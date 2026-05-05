@@ -4,665 +4,98 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Operation Assistant · Presentation System</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
+
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════ */
 :root {
-  --bg:        #0e1015;
-  --surface:   #161a21;
-  --card:      #1c2130;
-  --border:    #252d3d;
-  --border2:   #2e3a50;
-  --text:      #cdd6e8;
-  --muted:     #566078;
-  --accent:    #4a9eff;
-  --green:     #3ecf8e;
-  --orange:    #f59e3a;
-  --red:       #f55a5a;
-  --purple:    #a78bfa;
-  --yellow:    #f0c040;
-  --mono:      'IBM Plex Mono', monospace;
-  --sans:      'IBM Plex Sans', sans-serif;
-  --radius:    6px;
-  --transition: 150ms ease;
+  /* Greys — primary palette */
+  --white:     #ffffff;
+  --grey-50:   #f8f9fa;
+  --grey-100:  #f1f3f5;
+  --grey-150:  #e8eaed;
+  --grey-200:  #dee1e6;
+  --grey-300:  #c1c7d0;
+  --grey-400:  #97a0af;
+  --grey-500:  #6b778c;
+  --grey-600:  #505f79;
+  --grey-700:  #344563;
+  --grey-800:  #253858;
+  --grey-900:  #172b4d;
+  --black:     #091e42;
+
+  /* Surface stack */
+  --bg:        #f8f9fa;
+  --surface:   #ffffff;
+  --card:      #ffffff;
+  --border:    #e8eaed;
+  --border2:   #dee1e6;
+  --text:      #172b4d;
+  --muted:     #6b778c;
+  --subtle:    #97a0af;
+
+  /* Status colors — kept from original */
+  --accent:    #0c66e4;   /* blue  — in progress / brand */
+  --green:     #1f845a;   /* completed */
+  --orange:    #c25100;   /* medium priority / carry-over */
+  --red:       #ae2a19;   /* blocked / critical */
+  --purple:    #5e4db2;   /* projects */
+  --yellow:    #7f5f01;   /* warning */
+
+  /* Status backgrounds (softer) */
+  --accent-bg: #e9f2ff;
+  --green-bg:  #dcfff1;
+  --orange-bg: #fff3eb;
+  --red-bg:    #ffeceb;
+  --purple-bg: #f3f0ff;
+  --yellow-bg: #fff7d6;
+
+  /* Typography */
+  --mono:      'DM Mono', monospace;
+  --sans:      'DM Sans', sans-serif;
+  --radius:    8px;
+  --radius-lg: 12px;
+  --transition: 160ms cubic-bezier(.4,0,.2,1);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(9,30,66,.08), 0 0 0 1px rgba(9,30,66,.04);
+  --shadow-md: 0 4px 16px rgba(9,30,66,.10), 0 0 0 1px rgba(9,30,66,.04);
+  --shadow-lg: 0 12px 40px rgba(9,30,66,.14);
 }
 
-*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+/* ═══════════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--sans);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  font-size: 13px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ── LAYOUT ── */
-.layout { display:flex; min-height:100vh; }
-
-/* ── SIDEBAR ── */
-.sidebar {
-  width: 220px;
-  flex-shrink: 0;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.sidebar-logo {
-  padding: 20px 18px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.sidebar-logo .mark {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--accent);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-.sidebar-logo .name {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text);
-  margin-top: 2px;
-}
-
-.nav-section {
-  padding: 12px 10px 0;
-}
-.nav-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--muted);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  padding: 0 8px;
-  margin-bottom: 4px;
-}
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 7px 10px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-  font-size: 12.5px;
-  font-weight: 400;
-  color: var(--muted);
-  margin-bottom: 1px;
-  user-select: none;
-}
-.nav-item:hover { background: var(--card); color: var(--text); }
-.nav-item.active { background: rgba(74,158,255,.12); color: var(--accent); font-weight: 500; }
-.nav-item .dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  flex-shrink: 0;
-}
-.nav-item .badge {
-  margin-left: auto;
-  background: var(--border2);
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 9px;
-  padding: 1px 6px;
-  border-radius: 10px;
-}
-.nav-item.active .badge { background: rgba(74,158,255,.2); color: var(--accent); }
-
-.sidebar-footer {
-  margin-top: auto;
-  padding: 14px 18px;
-  border-top: 1px solid var(--border);
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--muted);
-}
-.sidebar-footer .user {
-  font-size: 11px;
-  color: var(--text);
-  font-family: var(--sans);
-  font-weight: 500;
-  margin-bottom: 2px;
-}
-.sidebar-footer .role {
-  color: var(--accent);
-  font-size: 9px;
-  letter-spacing: .08em;
-}
-
-/* ── MAIN ── */
-.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-
-/* ── TOPBAR ── */
-.topbar {
-  height: 52px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 24px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.topbar-title {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: .06em;
-}
-.topbar-breadcrumb {
-  font-size: 11px;
-  color: var(--muted);
-}
-.topbar-breadcrumb span { color: var(--accent); }
-.topbar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius);
-  font-family: var(--sans);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition);
-  border: 1px solid transparent;
-}
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-.btn-primary:hover { background: #5eaaff; }
-.btn-ghost {
-  background: transparent;
-  color: var(--muted);
-  border-color: var(--border2);
-}
-.btn-ghost:hover { background: var(--card); color: var(--text); }
-
-/* ── CONTENT ── */
-.content { flex: 1; padding: 24px; overflow-x: hidden; }
-
-/* ── VIEWS ── */
-.view { display: none; }
-.view.active { display: block; animation: fadeIn .2s ease; }
-@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
-
-/* ── KPI ROW ── */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.kpi-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  transition: border-color var(--transition);
-}
-.kpi-card:hover { border-color: var(--border2); }
-.kpi-card .kpi-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-.kpi-card .kpi-value {
-  font-family: var(--mono);
-  font-size: 28px;
-  font-weight: 600;
-  line-height: 1;
-}
-.kpi-card .kpi-sub {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 4px;
-}
-
-/* ── SECTION HEADER ── */
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-.section-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.section-line {
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* ── FILTERS ── */
-.filters {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-.filter-select {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 12px;
-  padding: 6px 10px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  outline: none;
-  transition: border-color var(--transition);
-}
-.filter-select:focus { border-color: var(--accent); }
-.search-input {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 12px;
-  padding: 6px 12px;
-  border-radius: var(--radius);
-  outline: none;
-  width: 220px;
-  transition: border-color var(--transition);
-}
-.search-input::placeholder { color: var(--muted); }
-.search-input:focus { border-color: var(--accent); }
-
-/* ── TABLE ── */
-.table-wrap {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 24px;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-thead th {
-  background: var(--surface);
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 10px 14px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background var(--transition);
-}
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: rgba(255,255,255,.025); }
-tbody td {
-  padding: 10px 14px;
-  font-size: 12px;
-  vertical-align: middle;
-}
-
-/* ── BADGES ── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.badge-pending    { background: rgba(86,96,120,.25);  color: #8fa1c0; }
-.badge-progress   { background: rgba(74,158,255,.15); color: var(--accent); }
-.badge-completed  { background: rgba(62,207,142,.15); color: var(--green); }
-.badge-blocked    { background: rgba(245,90,90,.15);  color: var(--red); }
-.badge-high       { background: rgba(245,90,90,.12);  color: var(--red); }
-.badge-critical   { background: rgba(245,90,90,.25);  color: #ff8080; font-weight:700; }
-.badge-medium     { background: rgba(245,158,58,.12); color: var(--orange); }
-.badge-low        { background: rgba(62,207,142,.1);  color: var(--green); }
-.badge-area-acc   { background: rgba(74,158,255,.12); color: var(--accent); }
-.badge-area-opc   { background: rgba(62,207,142,.12); color: var(--green); }
-.badge-area-fin   { background: rgba(245,158,58,.12); color: var(--orange); }
-.badge-area-opp   { background: rgba(167,139,250,.12);color: var(--purple); }
-.badge-area-hr    { background: rgba(245,90,90,.12);  color: var(--red); }
-
-.urgency-overdue  { color: var(--red); font-family:var(--mono); font-size:10px; }
-.urgency-soon     { color: var(--orange); font-family:var(--mono); font-size:10px; }
-.urgency-ok       { color: var(--green); font-family:var(--mono); font-size:10px; }
-
-/* ── TASK DESCRIPTION ── */
-.task-desc { max-width: 320px; }
-.task-desc .title { font-weight:500; color: var(--text); margin-bottom: 2px; }
-.task-desc .sub { font-size: 11px; color: var(--muted); }
-
-/* ── FORM ── */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.form-grid.full { grid-template-columns: 1fr; }
-.form-field { display: flex; flex-direction: column; gap: 6px; }
-.form-field label {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.form-field input,
-.form-field select,
-.form-field textarea {
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 12.5px;
-  padding: 8px 12px;
-  border-radius: var(--radius);
-  outline: none;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-.form-field input:focus,
-.form-field select:focus,
-.form-field textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(74,158,255,.12);
-}
-.form-field textarea { resize: vertical; min-height: 72px; }
-.form-field input::placeholder,
-.form-field textarea::placeholder { color: var(--muted); }
-
-.form-panel {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 24px;
-}
-.form-panel-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 16px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-.form-actions { display: flex; gap: 10px; margin-top: 4px; }
-
-/* ── AREA OVERVIEW ── */
-.area-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.area-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  border-top: 2px solid transparent;
-  transition: border-color var(--transition), transform var(--transition);
-  cursor: pointer;
-}
-.area-card:hover { transform: translateY(-1px); }
-.area-card .area-name {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-.area-card .area-stat { display: flex; justify-content: space-between; margin-bottom: 4px; }
-.area-card .area-stat-label { font-size: 10.5px; color: var(--muted); }
-.area-card .area-stat-val { font-family: var(--mono); font-size: 10.5px; }
-.progress-bar-bg {
-  height: 3px;
-  background: var(--border2);
-  border-radius: 2px;
-  margin-top: 10px;
-}
-.progress-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width .5s ease;
-}
-
-/* ── WEEKLY PANEL ── */
-.weekly-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.metric-mini {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  text-align: center;
-}
-.metric-mini .val {
-  font-family: var(--mono);
-  font-size: 24px;
-  font-weight: 700;
-}
-.metric-mini .lbl {
-  font-size: 10.5px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-.area-week-block {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 12px;
-  overflow: hidden;
-}
-.area-week-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-.area-week-header .area-tag {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .1em;
-}
-.area-week-header .mini-badges { margin-left: auto; display: flex; gap: 6px; }
-.area-week-table { width: 100%; border-collapse: collapse; }
-.area-week-table td {
-  padding: 8px 16px;
-  font-size: 11.5px;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
-.area-week-table tr:last-child td { border-bottom: none; }
-.area-week-table .task-col { max-width: 260px; }
-.note-area {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  margin: 0 16px 14px;
-  font-size: 11.5px;
-  color: var(--muted);
-  font-style: italic;
-  cursor: text;
-  min-height: 36px;
-  outline: none;
-  transition: border-color var(--transition);
-}
-.note-area:focus { border-color: var(--accent); color: var(--text); font-style: normal; }
-
-/* ── TOAST ── */
-.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-.toast {
-  background: var(--card);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  padding: 10px 16px;
-  font-size: 12.5px;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.4);
-  animation: slideIn .25s ease;
-  min-width: 240px;
-}
-.toast.success { border-left: 3px solid var(--green); }
-.toast.error   { border-left: 3px solid var(--red); }
-@keyframes slideIn { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:none; } }
-
-/* ── MODAL ── */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,.65);
-  z-index: 500;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(2px);
-}
-.modal-overlay.open { display: flex; }
-.modal {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 8px;
-  padding: 24px;
-  width: 560px;
-  max-width: 95vw;
-  max-height: 90vh;
-  overflow-y: auto;
-  animation: modalIn .2s ease;
-}
-@keyframes modalIn { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:none; } }
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.modal-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-}
-.modal-sub {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-.modal-close {
-  margin-left: auto;
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 18px;
-  cursor: pointer;
-  padding: 0 4px;
-  transition: color var(--transition);
-}
-.modal-close:hover { color: var(--text); }
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-
-/* ── CHIP ── */
-.id-chip {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  padding: 1px 7px;
-  border-radius: 4px;
-}
-
-/* ── AREA HEADER PAGE ── */
-.area-page-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
-}
-.area-page-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.area-page-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text);
-}
-.area-page-code {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-}
-
-/* ── LOADING ── */
+/* ═══════════════════════════════════════════════════════════
+   LOADING OVERLAY
+═══════════════════════════════════════════════════════════ */
 .loading-overlay {
   position: fixed; inset: 0;
-  background: var(--bg);
+  background: #fff;
   z-index: 9000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
   transition: opacity .4s ease;
 }
 .loading-overlay.hidden { opacity: 0; pointer-events: none; }
 .spinner {
-  width: 28px; height: 28px;
+  width: 32px; height: 32px;
   border: 2px solid var(--border2);
   border-top-color: var(--accent);
   border-radius: 50%;
@@ -675,26 +108,836 @@ tbody td {
   color: var(--muted);
   letter-spacing: .1em;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   LANDING PAGE
+═══════════════════════════════════════════════════════════ */
+#landing {
+  position: fixed; inset: 0;
+  background: var(--white);
+  z-index: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  padding: 40px 20px;
+  transition: opacity .5s ease, transform .5s ease;
+}
+#landing.hidden {
+  opacity: 0;
+  transform: translateY(-16px);
+  pointer-events: none;
+}
+
+.landing-inner {
+  max-width: 520px;
+  width: 100%;
+  text-align: center;
+  animation: fadeUp .6s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.landing-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 500;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid rgba(12,102,228,.15);
+  padding: 5px 12px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+}
+.landing-badge::before {
+  content: '';
+  display: block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .3; }
+}
+
+.landing-title {
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  margin-bottom: 16px;
+}
+.landing-title span { color: var(--accent); }
+
+.landing-desc {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: 36px;
+  max-width: 400px;
+  margin-left: auto; margin-right: auto;
+}
+
+.landing-cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 14px; font-weight: 600;
+  padding: 14px 32px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: none;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  box-shadow: 0 2px 8px rgba(12,102,228,.35);
+  letter-spacing: -.01em;
+}
+.landing-cta:hover {
+  background: #0055cc;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(12,102,228,.4);
+}
+.landing-cta:active { transform: translateY(0); }
+.landing-cta svg { transition: transform var(--transition); }
+.landing-cta:hover svg { transform: translateX(3px); }
+
+.landing-stats {
+  display: flex; align-items: center; justify-content: center;
+  gap: 32px; margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+.landing-stat {
+  text-align: center;
+  animation: fadeUp .6s ease both;
+}
+.landing-stat:nth-child(2) { animation-delay: .1s; }
+.landing-stat:nth-child(3) { animation-delay: .2s; }
+
+.landing-stat .val {
+  font-family: var(--mono);
+  font-size: 22px; font-weight: 500;
+  color: var(--black);
+}
+.landing-stat .lbl {
+  font-size: 11px;
+  color: var(--subtle);
+  margin-top: 2px;
+}
+
+.landing-divider { width: 1px; height: 36px; background: var(--border); }
+
+/* ═══════════════════════════════════════════════════════════
+   APP LAYOUT
+═══════════════════════════════════════════════════════════ */
+#app { display: none; }
+#app.visible { display: flex; min-height: 100vh; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════════ */
+.sidebar {
+  width: 224px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+.sidebar-logo {
+  padding: 20px 18px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo .mark {
+  font-family: var(--mono);
+  font-size: 9px; font-weight: 500;
+  color: var(--accent);
+  letter-spacing: .14em; text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.sidebar-logo .name {
+  font-size: 13px; font-weight: 700;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
+.nav-section { padding: 16px 12px 0; }
+.nav-label {
+  font-family: var(--mono);
+  font-size: 9px; font-weight: 500;
+  color: var(--subtle);
+  letter-spacing: .12em; text-transform: uppercase;
+  padding: 0 6px;
+  margin-bottom: 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  font-size: 13px; font-weight: 400;
+  color: var(--muted);
+  margin-bottom: 1px;
+  user-select: none;
+  position: relative;
+}
+.nav-item:hover { background: var(--grey-100); color: var(--text); }
+.nav-item.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+.nav-item .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  flex-shrink: 0;
+  opacity: .7;
+}
+.nav-item.active .dot { opacity: 1; }
+.nav-item .badge {
+  margin-left: auto;
+  background: var(--grey-150);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+.nav-item.active .badge {
+  background: rgba(12,102,228,.12);
+  color: var(--accent);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 18px;
+  border-top: 1px solid var(--border);
+}
+.sidebar-footer .user {
+  font-size: 12px; font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.sidebar-footer .role {
+  font-family: var(--mono);
+  font-size: 9px; font-weight: 500;
+  color: var(--accent);
+  letter-spacing: .1em; text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN AREA
+═══════════════════════════════════════════════════════════ */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ── TOPBAR ── */
+.topbar {
+  height: 56px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 24px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 0 var(--border);
+}
+.topbar-title {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  color: var(--subtle);
+  letter-spacing: .08em;
+}
+.topbar-breadcrumb { font-size: 12px; color: var(--muted); }
+.topbar-breadcrumb span { color: var(--text); font-weight: 500; }
+.topbar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 1px 3px rgba(12,102,228,.25);
+}
+.btn-primary:hover {
+  background: #0055cc;
+  box-shadow: 0 2px 8px rgba(12,102,228,.35);
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: none; }
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border2);
+}
+.btn-ghost:hover { background: var(--grey-100); color: var(--text); border-color: var(--grey-300); }
+.btn-danger {
+  background: transparent;
+  color: var(--red);
+  border-color: rgba(174,42,25,.25);
+}
+.btn-danger:hover { background: var(--red-bg); }
+
+/* ── CONTENT ── */
+.content { flex: 1; padding: 28px; overflow-x: hidden; }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; animation: fadeSlide .22s ease; }
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KPI ROW
+═══════════════════════════════════════════════════════════ */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  transition: box-shadow var(--transition), transform var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.kpi-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.kpi-card .kpi-label {
+  font-family: var(--mono);
+  font-size: 9px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--subtle);
+  margin-bottom: 8px;
+}
+.kpi-card .kpi-value {
+  font-family: var(--mono);
+  font-size: 30px; font-weight: 500;
+  line-height: 1;
+}
+.kpi-card .kpi-sub {
+  font-size: 11px; color: var(--subtle); margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SECTION HEADER
+═══════════════════════════════════════════════════════════ */
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--subtle);
+  white-space: nowrap;
+}
+.section-line { flex: 1; height: 1px; background: var(--border); }
+
+/* ═══════════════════════════════════════════════════════════
+   FILTERS
+═══════════════════════════════════════════════════════════ */
+.filters {
+  display: flex; gap: 8px;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+.filter-select {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--sans); font-size: 13px;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  cursor: pointer; outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.filter-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(12,102,228,.1); }
+.search-input {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--sans); font-size: 13px;
+  padding: 7px 14px;
+  border-radius: var(--radius); outline: none;
+  width: 240px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.search-input::placeholder { color: var(--subtle); }
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(12,102,228,.1); }
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE
+═══════════════════════════════════════════════════════════ */
+.table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+}
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  background: var(--grey-50);
+  font-family: var(--mono);
+  font-size: 9px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--subtle);
+  padding: 11px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--grey-50); }
+tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
+
+/* ═══════════════════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════════════════ */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 500;
+  white-space: nowrap;
+}
+/* Status */
+.badge-pending    { background: var(--grey-100);  color: var(--grey-600); }
+.badge-progress   { background: var(--accent-bg); color: var(--accent); }
+.badge-completed  { background: var(--green-bg);  color: var(--green); }
+.badge-blocked    { background: var(--red-bg);    color: var(--red); }
+/* Priority */
+.badge-high       { background: var(--red-bg);    color: var(--red); }
+.badge-critical   { background: var(--red-bg);    color: var(--red); font-weight: 700; }
+.badge-medium     { background: var(--orange-bg); color: var(--orange); }
+.badge-low        { background: var(--green-bg);  color: var(--green); }
+/* Area */
+.badge-area-acc   { background: var(--accent-bg); color: var(--accent); }
+.badge-area-opc   { background: var(--green-bg);  color: var(--green); }
+.badge-area-fin   { background: var(--orange-bg); color: var(--orange); }
+.badge-area-opp   { background: var(--purple-bg); color: var(--purple); }
+.badge-area-hr    { background: var(--red-bg);    color: var(--red); }
+
+/* Urgency */
+.urgency-overdue { color: var(--red);    font-family: var(--mono); font-size: 11px; font-weight: 500; }
+.urgency-soon    { color: var(--orange); font-family: var(--mono); font-size: 11px; }
+.urgency-ok      { color: var(--green);  font-family: var(--mono); font-size: 11px; }
+
+/* ═══════════════════════════════════════════════════════════
+   TASK DESCRIPTION CELL
+═══════════════════════════════════════════════════════════ */
+.task-desc { max-width: 300px; }
+.task-desc .title { font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.task-desc .sub { font-size: 11.5px; color: var(--subtle); }
+.task-desc .file-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; color: var(--accent);
+  background: var(--accent-bg);
+  padding: 1px 7px; border-radius: 4px; margin-top: 4px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.task-desc .file-tag:hover { background: rgba(12,102,228,.15); }
+
+/* ═══════════════════════════════════════════════════════════
+   FORM
+═══════════════════════════════════════════════════════════ */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px; margin-bottom: 20px;
+}
+.form-grid.full { grid-template-columns: 1fr; }
+.form-grid.three { grid-template-columns: repeat(3, 1fr); }
+
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .04em; text-transform: uppercase;
+  color: var(--muted);
+}
+.form-field input,
+.form-field select,
+.form-field textarea {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--sans); font-size: 13px;
+  padding: 9px 12px;
+  border-radius: var(--radius); outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(12,102,228,.1);
+}
+.form-field textarea { resize: vertical; min-height: 80px; }
+.form-field input::placeholder,
+.form-field textarea::placeholder { color: var(--subtle); }
+
+/* File upload field */
+.file-upload-zone {
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--radius);
+  background: var(--bg);
+  padding: 16px 14px;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  display: flex; align-items: center; gap: 10px;
+}
+.file-upload-zone:hover {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+.file-upload-zone input[type="file"] { display: none; }
+.file-upload-zone .upload-icon {
+  width: 32px; height: 32px;
+  border-radius: var(--radius);
+  background: var(--grey-100);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  transition: background var(--transition);
+}
+.file-upload-zone:hover .upload-icon { background: var(--accent-bg); }
+.file-upload-zone .upload-text { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.file-upload-zone .upload-text strong { color: var(--accent); font-weight: 500; }
+.file-upload-zone .upload-text .ext { color: var(--subtle); font-size: 10.5px; margin-top: 1px; }
+
+.file-preview {
+  display: none;
+  align-items: center; gap: 10px;
+  background: var(--accent-bg);
+  border: 1px solid rgba(12,102,228,.2);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-top: 6px;
+}
+.file-preview.visible { display: flex; }
+.file-preview .file-name {
+  flex: 1; font-size: 12px; color: var(--accent);
+  font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.file-preview .file-remove {
+  background: none; border: none;
+  color: var(--muted); cursor: pointer; font-size: 14px; padding: 0 2px;
+  transition: color var(--transition);
+}
+.file-preview .file-remove:hover { color: var(--red); }
+
+.form-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+}
+.form-panel-title {
+  font-size: 14px; font-weight: 700;
+  color: var(--text);
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: -.01em;
+}
+.form-actions { display: flex; gap: 10px; margin-top: 8px; }
+
+/* ═══════════════════════════════════════════════════════════
+   AREA OVERVIEW CARDS
+═══════════════════════════════════════════════════════════ */
+.area-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.area-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  border-top: 3px solid transparent;
+  transition: box-shadow var(--transition), transform var(--transition);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.area-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.area-card .area-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.area-card .area-stat { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.area-card .area-stat-label { font-size: 11px; color: var(--subtle); }
+.area-card .area-stat-val { font-family: var(--mono); font-size: 11px; }
+.progress-bar-bg { height: 3px; background: var(--border2); border-radius: 2px; margin-top: 12px; }
+.progress-bar-fill { height: 100%; border-radius: 2px; transition: width .6s ease; }
+
+/* ═══════════════════════════════════════════════════════════
+   WEEKLY REVIEW
+═══════════════════════════════════════════════════════════ */
+.weekly-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.metric-mini {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px; text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.metric-mini .val { font-family: var(--mono); font-size: 26px; font-weight: 500; }
+.metric-mini .lbl { font-size: 11px; color: var(--subtle); margin-top: 3px; }
+
+.area-week-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px; overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.area-week-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--grey-50);
+}
+.area-week-header .mini-badges { margin-left: auto; display: flex; gap: 6px; }
+.area-week-table { width: 100%; border-collapse: collapse; }
+.area-week-table td { padding: 9px 18px; font-size: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.area-week-table tr:last-child td { border-bottom: none; }
+.area-week-table .task-col { max-width: 260px; }
+
+.note-area {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  margin: 0 18px 16px;
+  font-size: 12px; color: var(--subtle); font-style: italic;
+  cursor: text; min-height: 36px; outline: none;
+  transition: border-color var(--transition);
+}
+.note-area:focus { border-color: var(--accent); color: var(--text); font-style: normal; }
+
+/* ═══════════════════════════════════════════════════════════
+   AREA PAGE HEADER
+═══════════════════════════════════════════════════════════ */
+.area-page-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 24px; padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.area-page-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.area-page-name { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
+.area-page-code { font-family: var(--mono); font-size: 10px; color: var(--subtle); margin-top: 1px; }
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  font-size: 13px; color: var(--text);
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn .25s cubic-bezier(.34,1.56,.64,1);
+  min-width: 260px;
+}
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error   { border-left: 3px solid var(--red); }
+@keyframes toastIn { from { opacity:0; transform:translateX(20px) scale(.95); } to { opacity:1; transform:none; } }
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(9,30,66,.5);
+  z-index: 500;
+  display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(3px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 580px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn .22s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(8px); } to { opacity:1; transform:none; } }
+.modal-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 22px; }
+.modal-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
+.modal-sub { font-family: var(--mono); font-size: 10px; color: var(--subtle); margin-top: 2px; }
+.modal-close {
+  margin-left: auto;
+  background: var(--grey-100); border: none;
+  color: var(--muted); font-size: 16px; cursor: pointer;
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition), color var(--transition);
+}
+.modal-close:hover { background: var(--grey-200); color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════════════════════ */
+.id-chip {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--subtle);
+  background: var(--grey-100);
+  border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 5px;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--grey-200); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--grey-300); }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE
+═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 64px; overflow: hidden;
+  }
+  .sidebar-logo .name,
+  .nav-label,
+  .nav-item span:not(.dot):not(.badge),
+  .sidebar-footer .user,
+  .sidebar-footer .role { display: none; }
+  .nav-item { justify-content: center; padding: 10px; }
+  .nav-item .badge { display: none; }
+
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .area-grid { grid-template-columns: repeat(2, 1fr); }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid.three { grid-template-columns: 1fr; }
+  .weekly-grid { grid-template-columns: 1fr; }
+  .topbar-title { display: none; }
+  .content { padding: 16px; }
+
+  .landing-stats { gap: 16px; }
+}
+
+@media (max-width: 480px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .area-grid { grid-template-columns: 1fr; }
+}
+
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
+<!-- ══════════════════════════════════════════════════════════
+     LOADING OVERLAY
+══════════════════════════════════════════════════════════ -->
 <div class="loading-overlay" id="loader">
   <div class="spinner"></div>
-  <div class="loading-label">INITIALIZING SYSTEM…</div>
+  <div class="loading-label">INITIALIZING…</div>
 </div>
 
-<!-- TOAST CONTAINER -->
+<!-- ══════════════════════════════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════════════════════════════ -->
+<section id="landing">
+  <div class="landing-inner">
+
+    <div class="landing-badge">
+      Operation Assistant
+    </div>
+
+    <h1 class="landing-title">
+      Operations, <span>organized.</span>
+    </h1>
+
+    <p class="landing-desc">
+      Manage tasks, track progress across areas, and generate weekly reviews — all in one lightweight, offline-ready dashboard.
+    </p>
+
+    <button class="landing-cta" onclick="enterApp()">
+      Get Started
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="landing-stats" id="landingStats">
+      <div class="landing-stat">
+        <div class="val" id="ls-total">—</div>
+        <div class="lbl">Total Tasks</div>
+      </div>
+      <div class="landing-divider"></div>
+      <div class="landing-stat">
+        <div class="val" id="ls-areas">5</div>
+        <div class="lbl">Work Areas</div>
+      </div>
+      <div class="landing-divider"></div>
+      <div class="landing-stat">
+        <div class="val" id="ls-done">—</div>
+        <div class="lbl">Completed</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     TOAST CONTAINER
+══════════════════════════════════════════════════════════ -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- MODAL -->
+<!-- ══════════════════════════════════════════════════════════
+     EDIT MODAL
+══════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal" id="modal">
     <div class="modal-header">
       <div>
-        <div class="modal-title" id="modalTitle">New Task</div>
-        <div class="modal-sub" id="modalSub">Fill in the details below</div>
+        <div class="modal-title" id="modalTitle">Edit Task</div>
+        <div class="modal-sub" id="modalSub"></div>
       </div>
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
@@ -702,7 +945,11 @@ tbody td {
   </div>
 </div>
 
-<div class="layout">
+<!-- ══════════════════════════════════════════════════════════
+     APP
+══════════════════════════════════════════════════════════ -->
+<div id="app">
+
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-logo">
@@ -728,7 +975,7 @@ tbody td {
         </div>
       </div>
 
-      <div class="nav-section" style="margin-top:12px;">
+      <div class="nav-section" style="margin-top:16px;">
         <div class="nav-label">Areas</div>
         <div class="nav-item" onclick="navigate('area-ACC', this)" id="nav-ACC">
           <span class="dot" style="background:var(--accent)"></span>
@@ -760,19 +1007,27 @@ tbody td {
 
     <div class="sidebar-footer">
       <div class="user">Santiago Cocovi</div>
-      <div class="role">OPERATIONS ADMIN</div>
+      <div class="role">Operations Admin</div>
     </div>
   </aside>
 
   <!-- MAIN -->
   <div class="main">
+
     <!-- TOPBAR -->
     <header class="topbar">
       <div class="topbar-title">OPERATION ASSISTANT</div>
       <div class="topbar-breadcrumb">/ <span id="breadcrumb">Dashboard</span></div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost" onclick="exportData()">⬇ Export</button>
-        <button class="btn btn-primary" onclick="navigate('new-task', null); document.querySelectorAll('.nav-item')[1].classList.add('active')">+ New Task</button>
+        <button class="btn btn-ghost" onclick="exportData()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0">
+            <path d="M7 2v7M4 7l3 3 3-3M2 10v1.5A.5.5 0 002.5 12h9a.5.5 0 00.5-.5V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Export CSV
+        </button>
+        <button class="btn btn-primary" onclick="navigate('new-task', null); document.querySelectorAll('.nav-item')[1].classList.add('active')">
+          + New Task
+        </button>
       </div>
     </header>
 
@@ -836,6 +1091,8 @@ tbody td {
       <div class="view" id="view-new-task">
         <div class="form-panel">
           <div class="form-panel-title">Create New Task</div>
+
+          <!-- Row 1: Area + Owner -->
           <div class="form-grid">
             <div class="form-field">
               <label>Area *</label>
@@ -849,15 +1106,19 @@ tbody td {
             </div>
             <div class="form-field">
               <label>Owner *</label>
-              <input type="text" id="nt-owner" placeholder="e.g. Troy, Dani, Marcus…"/>
+              <input type="text" id="nt-owner" placeholder="Responsible person"/>
             </div>
           </div>
+
+          <!-- Row 2: Description -->
           <div class="form-grid full">
             <div class="form-field">
               <label>Task Description *</label>
               <input type="text" id="nt-desc" placeholder="What needs to be done?"/>
             </div>
           </div>
+
+          <!-- Row 3: Priority + Status + Start + Deadline -->
           <div class="form-grid">
             <div class="form-field">
               <label>Priority</label>
@@ -886,12 +1147,34 @@ tbody td {
               <input type="date" id="nt-deadline"/>
             </div>
           </div>
+
+          <!-- Row 4: Comments -->
           <div class="form-grid full">
             <div class="form-field">
               <label>Comments / Notes</label>
               <textarea id="nt-comments" placeholder="Blockers, context, links…"></textarea>
             </div>
           </div>
+
+          <!-- Row 5: File attachment -->
+          <div class="form-grid full">
+            <div class="form-field">
+              <label>Attach File (optional)</label>
+              <div class="file-upload-zone" onclick="document.getElementById('nt-file').click()">
+                <input type="file" id="nt-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.xlsm" onchange="handleFileSelect(this,'nt-file-preview','nt-file-name')"/>
+                <div class="upload-icon">📎</div>
+                <div class="upload-text">
+                  <strong>Click to attach a file</strong>
+                  <div class="ext">.pdf · .doc · .docx · .xls · .xlsx · .xlsm</div>
+                </div>
+              </div>
+              <div class="file-preview" id="nt-file-preview">
+                <span class="file-name" id="nt-file-name"></span>
+                <button class="file-remove" onclick="removeFile('nt-file','nt-file-preview','nt-file-name')" title="Remove file">×</button>
+              </div>
+            </div>
+          </div>
+
           <div class="form-actions">
             <button class="btn btn-primary" onclick="createTask()">Create Task</button>
             <button class="btn btn-ghost" onclick="resetNewTaskForm()">Clear</button>
@@ -905,7 +1188,7 @@ tbody td {
         <div id="weeklyAreas"></div>
       </div>
 
-      <!-- ── AREA VIEWS (generated) ── -->
+      <!-- ── AREA VIEWS (generated by JS) ── -->
       <div class="view" id="view-area-ACC"></div>
       <div class="view" id="view-area-OPC"></div>
       <div class="view" id="view-area-FIN"></div>
@@ -914,57 +1197,80 @@ tbody td {
 
     </div><!-- /content -->
   </div><!-- /main -->
-</div><!-- /layout -->
+</div><!-- /app -->
+
 
 <script>
-// ── STATE ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+
 const AREAS = {
-  ACC: { name:"Account",    color:"var(--accent)", hex:"#4a9eff", badge:"badge-area-acc" },
-  OPC: { name:"Operations", color:"var(--green)",  hex:"#3ecf8e", badge:"badge-area-opc" },
-  FIN: { name:"Finance",    color:"var(--orange)", hex:"#f59e3a", badge:"badge-area-fin" },
-  OPP: { name:"Projects",   color:"var(--purple)", hex:"#a78bfa", badge:"badge-area-opp" },
-  HR:  { name:"HR",         color:"var(--red)",    hex:"#f55a5a", badge:"badge-area-hr"  },
+  ACC: { name:"Account",    color:"var(--accent)", hex:"#0c66e4", badge:"badge-area-acc" },
+  OPC: { name:"Operations", color:"var(--green)",  hex:"#1f845a", badge:"badge-area-opc" },
+  FIN: { name:"Finance",    color:"var(--orange)", hex:"#c25100", badge:"badge-area-fin" },
+  OPP: { name:"Projects",   color:"var(--purple)", hex:"#5e4db2", badge:"badge-area-opp" },
+  HR:  { name:"HR",         color:"var(--red)",    hex:"#ae2a19", badge:"badge-area-hr"  },
 };
 
+// Tasks — each may have an optional `file` property (name) and `fileData` (base64 url)
 let tasks = [
-  { id:"ACC-001", area:"ACC", desc:"Riverside HOA proposal follow-up", owner:"Troy",   priority:"High",     status:"In Progress", start:"2025-05-01", deadline:"2025-05-09", comments:"Two competing bids. Call, not email." },
-  { id:"ACC-002", area:"ACC", desc:"Onboard new enterprise client – Greenfield",       owner:"Dani",   priority:"Medium",   status:"Pending",     start:"2025-05-05", deadline:"2025-05-16", comments:"Awaiting signed contract." },
-  { id:"ACC-003", area:"ACC", desc:"Renewal call with client Porter & Co",             owner:"Troy",   priority:"High",     status:"Pending",     start:"2025-05-06", deadline:"2025-05-13", comments:"Q2 renewal. Prepare deck." },
-  { id:"ACC-004", area:"ACC", desc:"Update CRM with Q1 interaction logs",              owner:"Dani",   priority:"Low",      status:"Completed",   start:"2025-04-28", deadline:"2025-05-02", comments:"Done." },
-  { id:"ACC-005", area:"ACC", desc:"Prepare account health scorecard",                 owner:"Troy",   priority:"Medium",   status:"In Progress", start:"2025-05-05", deadline:"2025-05-15", comments:"Template ready." },
-  { id:"OPC-001", area:"OPC", desc:"Distribute crew schedule to field leads",          owner:"Dani",   priority:"High",     status:"In Progress", start:"2025-05-01", deadline:"2025-05-07", comments:"Operational dependency." },
-  { id:"OPC-002", area:"OPC", desc:"Complete equipment maintenance log v1",            owner:"Dani",   priority:"Critical", status:"Blocked",     start:"2025-04-14", deadline:"2025-05-05", comments:"4 weeks overdue. No blockers reported." },
-  { id:"OPC-003", area:"OPC", desc:"Review and update SOPs – field operations",        owner:"Marcus", priority:"Medium",   status:"Pending",     start:"2025-05-05", deadline:"2025-05-20", comments:"Quarterly SOP review." },
-  { id:"OPC-004", area:"OPC", desc:"Vendor coordination – supply restock",             owner:"Carlos", priority:"Low",      status:"Completed",   start:"2025-04-30", deadline:"2025-05-03", comments:"Delivered." },
-  { id:"OPC-005", area:"OPC", desc:"Audit route efficiency – north side",              owner:"Dani",   priority:"Medium",   status:"Pending",     start:"2025-05-07", deadline:"2025-05-19", comments:"Needs field data export." },
-  { id:"FIN-001", area:"FIN", desc:"Draft Q3 pricing deck for Marcus",                 owner:"Troy",   priority:"Medium",   status:"In Progress", start:"2025-05-01", deadline:"2025-05-09", comments:"Marcus forwards to accountant month-end." },
-  { id:"FIN-002", area:"FIN", desc:"Reconcile May invoices",                           owner:"Dani",   priority:"High",     status:"Pending",     start:"2025-05-05", deadline:"2025-05-12", comments:"AP aging report attached." },
-  { id:"FIN-003", area:"FIN", desc:"Prepare payroll summary – field staff",            owner:"Marcus", priority:"High",     status:"Pending",     start:"2025-05-06", deadline:"2025-05-10", comments:"Bi-weekly cycle." },
-  { id:"FIN-004", area:"FIN", desc:"Q2 budget vs actual variance report",              owner:"Troy",   priority:"Medium",   status:"In Progress", start:"2025-05-03", deadline:"2025-05-17", comments:"Finance review required." },
-  { id:"FIN-005", area:"FIN", desc:"Expense report – April field ops",                 owner:"Carlos", priority:"Low",      status:"Completed",   start:"2025-04-29", deadline:"2025-05-01", comments:"Approved." },
-  { id:"OPP-001", area:"OPP", desc:"Draft field lead JD – north side routes",          owner:"Troy",   priority:"Medium",   status:"Pending",     start:"2025-05-05", deadline:"2025-05-15", comments:"Marcus reviews before Monday meeting." },
-  { id:"OPP-002", area:"OPP", desc:"Launch internal ops tracking project",             owner:"Dani",   priority:"High",     status:"In Progress", start:"2025-05-01", deadline:"2025-05-31", comments:"This system is the MVP." },
-  { id:"OPP-003", area:"OPP", desc:"Design scalable onboarding framework",             owner:"Marcus", priority:"Medium",   status:"Pending",     start:"2025-05-08", deadline:"2025-05-30", comments:"HR + Ops collaboration needed." },
-  { id:"OPP-004", area:"OPP", desc:"Implement new scheduling tool",                   owner:"Carlos", priority:"Low",      status:"Pending",     start:"2025-05-10", deadline:"2025-06-05", comments:"Evaluate 2 vendors first." },
-  { id:"OPP-005", area:"OPP", desc:"Process documentation – invoicing flow",          owner:"Dani",   priority:"High",     status:"Pending",     start:"2025-05-06", deadline:"2025-05-22", comments:"First draft by EOW." },
-  { id:"HR-001",  area:"HR",  desc:"Post field lead job description",                  owner:"Marcus", priority:"High",     status:"Pending",     start:"2025-05-10", deadline:"2025-05-17", comments:"After Troy finalises draft." },
-  { id:"HR-002",  area:"HR",  desc:"Schedule performance reviews – Q2",               owner:"Dani",   priority:"Medium",   status:"Pending",     start:"2025-05-08", deadline:"2025-05-24", comments:"All field leads included." },
-  { id:"HR-003",  area:"HR",  desc:"Update employee handbook section 4",              owner:"Marcus", priority:"Low",      status:"Completed",   start:"2025-04-28", deadline:"2025-05-01", comments:"PTO policy updated." },
-  { id:"HR-004",  area:"HR",  desc:"Offboarding checklist – departing staff",         owner:"Dani",   priority:"Medium",   status:"In Progress", start:"2025-05-05", deadline:"2025-05-14", comments:"IT access revocation pending." },
-  { id:"HR-005",  area:"HR",  desc:"Training plan – new crew members",                owner:"Carlos", priority:"High",     status:"Pending",     start:"2025-05-07", deadline:"2025-05-21", comments:"Safety + ops modules." },
+  { id:"ACC-001", area:"ACC", desc:"Riverside HOA proposal follow-up",       owner:"Troy",   priority:"High",     status:"In Progress", start:"2025-05-01", deadline:"2025-05-09", comments:"Two competing bids. Call, not email." },
+  { id:"ACC-002", area:"ACC", desc:"Onboard new enterprise client – Greenfield", owner:"Dani",   priority:"Medium",   status:"Pending",     start:"2025-05-05", deadline:"2025-05-16", comments:"Awaiting signed contract." },
+  { id:"ACC-003", area:"ACC", desc:"Renewal call with client Porter & Co",    owner:"Troy",   priority:"High",     status:"Pending",     start:"2025-05-06", deadline:"2025-05-13", comments:"Q2 renewal. Prepare deck." },
+  { id:"ACC-004", area:"ACC", desc:"Update CRM with Q1 interaction logs",     owner:"Dani",   priority:"Low",      status:"Completed",   start:"2025-04-28", deadline:"2025-05-02", comments:"Done." },
+  { id:"ACC-005", area:"ACC", desc:"Prepare account health scorecard",        owner:"Troy",   priority:"Medium",   status:"In Progress", start:"2025-05-05", deadline:"2025-05-15", comments:"Template ready." },
+  { id:"OPC-001", area:"OPC", desc:"Distribute crew schedule to field leads", owner:"Dani",   priority:"High",     status:"In Progress", start:"2025-05-01", deadline:"2025-05-07", comments:"Operational dependency." },
+  { id:"OPC-002", area:"OPC", desc:"Complete equipment maintenance log v1",   owner:"Dani",   priority:"Critical", status:"Blocked",     start:"2025-04-14", deadline:"2025-05-05", comments:"4 weeks overdue. No blockers reported." },
+  { id:"OPC-003", area:"OPC", desc:"Review and update SOPs – field operations",owner:"Marcus",priority:"Medium",   status:"Pending",     start:"2025-05-05", deadline:"2025-05-20", comments:"Quarterly SOP review." },
+  { id:"OPC-004", area:"OPC", desc:"Vendor coordination – supply restock",    owner:"Carlos", priority:"Low",      status:"Completed",   start:"2025-04-30", deadline:"2025-05-03", comments:"Delivered." },
+  { id:"OPC-005", area:"OPC", desc:"Audit route efficiency – north side",     owner:"Dani",   priority:"Medium",   status:"Pending",     start:"2025-05-07", deadline:"2025-05-19", comments:"Needs field data export." },
+  { id:"FIN-001", area:"FIN", desc:"Draft Q3 pricing deck for Marcus",        owner:"Troy",   priority:"Medium",   status:"In Progress", start:"2025-05-01", deadline:"2025-05-09", comments:"Marcus forwards to accountant month-end." },
+  { id:"FIN-002", area:"FIN", desc:"Reconcile May invoices",                  owner:"Dani",   priority:"High",     status:"Pending",     start:"2025-05-05", deadline:"2025-05-12", comments:"AP aging report attached." },
+  { id:"FIN-003", area:"FIN", desc:"Prepare payroll summary – field staff",   owner:"Marcus", priority:"High",     status:"Pending",     start:"2025-05-06", deadline:"2025-05-10", comments:"Bi-weekly cycle." },
+  { id:"FIN-004", area:"FIN", desc:"Q2 budget vs actual variance report",     owner:"Troy",   priority:"Medium",   status:"In Progress", start:"2025-05-03", deadline:"2025-05-17", comments:"Finance review required." },
+  { id:"FIN-005", area:"FIN", desc:"Expense report – April field ops",        owner:"Carlos", priority:"Low",      status:"Completed",   start:"2025-04-29", deadline:"2025-05-01", comments:"Approved." },
+  { id:"OPP-001", area:"OPP", desc:"Draft field lead JD – north side routes", owner:"Troy",   priority:"Medium",   status:"Pending",     start:"2025-05-05", deadline:"2025-05-15", comments:"Marcus reviews before Monday meeting." },
+  { id:"OPP-002", area:"OPP", desc:"Launch internal ops tracking project",    owner:"Dani",   priority:"High",     status:"In Progress", start:"2025-05-01", deadline:"2025-05-31", comments:"This system is the MVP." },
+  { id:"OPP-003", area:"OPP", desc:"Design scalable onboarding framework",    owner:"Marcus", priority:"Medium",   status:"Pending",     start:"2025-05-08", deadline:"2025-05-30", comments:"HR + Ops collaboration needed." },
+  { id:"OPP-004", area:"OPP", desc:"Implement new scheduling tool",           owner:"Carlos", priority:"Low",      status:"Pending",     start:"2025-05-10", deadline:"2025-06-05", comments:"Evaluate 2 vendors first." },
+  { id:"OPP-005", area:"OPP", desc:"Process documentation – invoicing flow",  owner:"Dani",   priority:"High",     status:"Pending",     start:"2025-05-06", deadline:"2025-05-22", comments:"First draft by EOW." },
+  { id:"HR-001",  area:"HR",  desc:"Post field lead job description",          owner:"Marcus", priority:"High",     status:"Pending",     start:"2025-05-10", deadline:"2025-05-17", comments:"After Troy finalises draft." },
+  { id:"HR-002",  area:"HR",  desc:"Schedule performance reviews – Q2",       owner:"Dani",   priority:"Medium",   status:"Pending",     start:"2025-05-08", deadline:"2025-05-24", comments:"All field leads included." },
+  { id:"HR-003",  area:"HR",  desc:"Update employee handbook section 4",      owner:"Marcus", priority:"Low",      status:"Completed",   start:"2025-04-28", deadline:"2025-05-01", comments:"PTO policy updated." },
+  { id:"HR-004",  area:"HR",  desc:"Offboarding checklist – departing staff", owner:"Dani",   priority:"Medium",   status:"In Progress", start:"2025-05-05", deadline:"2025-05-14", comments:"IT access revocation pending." },
+  { id:"HR-005",  area:"HR",  desc:"Training plan – new crew members",        owner:"Carlos", priority:"High",     status:"Pending",     start:"2025-05-07", deadline:"2025-05-21", comments:"Safety + ops modules." },
 ];
 
-const TODAY = "2025-05-06";
+const TODAY = new Date().toISOString().slice(0,10); // dynamic today
 let idCounters = { ACC:5, OPC:5, FIN:5, OPP:5, HR:5 };
 
-// ── UTILS ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// LANDING → APP TRANSITION
+// ═══════════════════════════════════════════════════════════
+
+function enterApp() {
+  const landing = document.getElementById('landing');
+  const app     = document.getElementById('app');
+  landing.classList.add('hidden');
+  setTimeout(() => {
+    landing.style.display = 'none';
+    app.classList.add('visible');
+    renderDashboard();
+  }, 480);
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+
 function urgency(deadline, status) {
-  if (status === "Completed") return { label:"✓ Done", cls:"urgency-ok" };
-  if (!deadline) return { label:"—", cls:"" };
-  if (deadline < TODAY) return { label:"🔴 Overdue", cls:"urgency-overdue" };
+  if (status === "Completed") return { label: "✓ Done",      cls: "urgency-ok"      };
+  if (!deadline)              return { label: "—",           cls: ""                };
+  if (deadline < TODAY)       return { label: "🔴 Overdue",  cls: "urgency-overdue" };
   const diff = (new Date(deadline) - new Date(TODAY)) / 86400000;
-  if (diff <= 3) return { label:"🟠 Due Soon", cls:"urgency-soon" };
-  return { label:"🟢 On Track", cls:"urgency-ok" };
+  if (diff <= 3)              return { label: "🟠 Due Soon", cls: "urgency-soon"    };
+  return                             { label: "🟢 On Track", cls: "urgency-ok"      };
 }
 
 function statusBadge(s) {
@@ -983,13 +1289,26 @@ function getOwners() {
   return [...new Set(tasks.map(t => t.owner))].sort();
 }
 
-// ── NAVIGATION ─────────────────────────────────────────────────────────────
+function fileIcon(name) {
+  if (!name) return '📎';
+  const ext = name.split('.').pop().toLowerCase();
+  if (ext === 'pdf') return '📄';
+  if (['doc','docx'].includes(ext)) return '📝';
+  if (['xls','xlsx','xlsm'].includes(ext)) return '📊';
+  return '📎';
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+
 function navigate(viewId, navEl) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const view = document.getElementById('view-' + viewId);
   if (view) view.classList.add('active');
   if (navEl) navEl.classList.add('active');
+
   const labels = {
     'dashboard':'Dashboard','new-task':'New Task','weekly':'Weekly Review',
     'area-ACC':'Account','area-OPC':'Operations','area-FIN':'Finance',
@@ -997,12 +1316,15 @@ function navigate(viewId, navEl) {
   };
   document.getElementById('breadcrumb').textContent = labels[viewId] || viewId;
 
-  if (viewId === 'dashboard') renderDashboard();
-  if (viewId === 'weekly')    renderWeekly();
-  if (viewId.startsWith('area-')) renderArea(viewId.replace('area-',''));
+  if (viewId === 'dashboard')          renderDashboard();
+  if (viewId === 'weekly')             renderWeekly();
+  if (viewId.startsWith('area-'))      renderArea(viewId.replace('area-',''));
 }
 
-// ── DASHBOARD ──────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════
+
 function renderDashboard() {
   renderKPIs();
   renderAreaCards();
@@ -1019,27 +1341,27 @@ function renderKPIs() {
   const pct = total ? Math.round(completed/total*100) : 0;
 
   document.getElementById('kpiRow').innerHTML = `
-    <div class="kpi-card" style="border-top:2px solid var(--accent)">
+    <div class="kpi-card" style="border-top:3px solid var(--accent)">
       <div class="kpi-label">Total Tasks</div>
       <div class="kpi-value" style="color:var(--accent)">${total}</div>
       <div class="kpi-sub">Across all areas</div>
     </div>
-    <div class="kpi-card" style="border-top:2px solid var(--green)">
+    <div class="kpi-card" style="border-top:3px solid var(--green)">
       <div class="kpi-label">Completed</div>
       <div class="kpi-value" style="color:var(--green)">${completed}</div>
       <div class="kpi-sub">${pct}% completion rate</div>
     </div>
-    <div class="kpi-card" style="border-top:2px solid #4a9eff80">
+    <div class="kpi-card" style="border-top:3px solid var(--grey-300)">
       <div class="kpi-label">In Progress</div>
       <div class="kpi-value" style="color:var(--text)">${inProgress}</div>
       <div class="kpi-sub">Active workload</div>
     </div>
-    <div class="kpi-card" style="border-top:2px solid var(--red)">
+    <div class="kpi-card" style="border-top:3px solid var(--red)">
       <div class="kpi-label">Blocked</div>
       <div class="kpi-value" style="color:var(--red)">${blocked}</div>
       <div class="kpi-sub">Needs escalation</div>
     </div>
-    <div class="kpi-card" style="border-top:2px solid var(--orange)">
+    <div class="kpi-card" style="border-top:3px solid var(--orange)">
       <div class="kpi-label">Pending</div>
       <div class="kpi-value" style="color:var(--orange)">${pending}</div>
       <div class="kpi-sub">Not yet started</div>
@@ -1049,10 +1371,10 @@ function renderKPIs() {
 
 function renderAreaCards() {
   const html = Object.entries(AREAS).map(([code, a]) => {
-    const areaT    = tasks.filter(t => t.area === code);
-    const done     = areaT.filter(t => t.status === "Completed").length;
-    const blocked  = areaT.filter(t => t.status === "Blocked").length;
-    const pct      = areaT.length ? Math.round(done/areaT.length*100) : 0;
+    const areaT   = tasks.filter(t => t.area === code);
+    const done    = areaT.filter(t => t.status === "Completed").length;
+    const blocked = areaT.filter(t => t.status === "Blocked").length;
+    const pct     = areaT.length ? Math.round(done/areaT.length*100) : 0;
     return `
       <div class="area-card" style="border-top-color:${a.hex}" onclick="navigate('area-${code}', document.getElementById('nav-${code}'))">
         <div class="area-name">${a.name}</div>
@@ -1090,14 +1412,23 @@ function renderDashboardTable() {
 
   const rows = filtered.map(t => {
     const urg = urgency(t.deadline, t.status);
+    const fileTag = t.file
+      ? `<div class="file-tag" onclick="downloadFile('${t.id}')">${fileIcon(t.file)} ${t.file}</div>`
+      : '';
     return `<tr>
       <td><span class="id-chip">${t.id}</span></td>
       <td>${areaBadge(t.area)}</td>
-      <td><div class="task-desc"><div class="title">${t.desc}</div><div class="sub">${t.comments||''}</div></div></td>
-      <td style="font-weight:500">${t.owner}</td>
+      <td>
+        <div class="task-desc">
+          <div class="title">${escHtml(t.desc)}</div>
+          <div class="sub">${escHtml(t.comments||'')}</div>
+          ${fileTag}
+        </div>
+      </td>
+      <td style="font-weight:500">${escHtml(t.owner)}</td>
       <td>${priorityBadge(t.priority)}</td>
       <td>${statusBadge(t.status)}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.deadline||'—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--subtle)">${t.deadline||'—'}</td>
       <td class="${urg.cls}">${urg.label}</td>
       <td>
         <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="openEditModal('${t.id}')">Edit</button>
@@ -1105,30 +1436,43 @@ function renderDashboardTable() {
     </tr>`;
   }).join('');
 
-  document.getElementById('dashTbody').innerHTML = rows || `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">No tasks match the current filters.</td></tr>`;
+  document.getElementById('dashTbody').innerHTML = rows ||
+    `<tr><td colspan="9" style="text-align:center;color:var(--subtle);padding:40px;font-size:13px">No tasks match the current filters.</td></tr>`;
 }
 
-// ── AREA VIEW ──────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// AREA VIEW
+// ═══════════════════════════════════════════════════════════
+
 function renderArea(code) {
-  const a = AREAS[code];
+  const a     = AREAS[code];
   const areaT = tasks.filter(t => t.area === code);
   document.getElementById(`badge-${code}`).textContent = areaT.length;
 
   const rows = areaT.map(t => {
     const urg = urgency(t.deadline, t.status);
+    const fileTag = t.file
+      ? `<div class="file-tag" style="margin-top:0" onclick="downloadFile('${t.id}')">${fileIcon(t.file)} ${escHtml(t.file)}</div>`
+      : '';
     return `<tr>
       <td><span class="id-chip">${t.id}</span></td>
-      <td><div class="task-desc"><div class="title">${t.desc}</div><div class="sub">${t.comments||''}</div></div></td>
-      <td style="font-weight:500">${t.owner}</td>
+      <td>
+        <div class="task-desc">
+          <div class="title">${escHtml(t.desc)}</div>
+          <div class="sub">${escHtml(t.comments||'')}</div>
+          ${fileTag}
+        </div>
+      </td>
+      <td style="font-weight:500">${escHtml(t.owner)}</td>
       <td>${priorityBadge(t.priority)}</td>
       <td>${statusBadge(t.status)}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.start||'—'}</td>
-      <td style="font-family:var(--mono);font-size:11px;color:var(--muted)">${t.deadline||'—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--subtle)">${t.start||'—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--subtle)">${t.deadline||'—'}</td>
       <td class="${urg.cls}">${urg.label}</td>
       <td>
         <div style="display:flex;gap:6px">
           <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="openEditModal('${t.id}')">Edit</button>
-          <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;color:var(--red);border-color:rgba(245,90,90,.3)" onclick="deleteTask('${t.id}')">✕</button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteTask('${t.id}')">✕</button>
         </div>
       </td>
     </tr>`;
@@ -1139,7 +1483,7 @@ function renderArea(code) {
       <div class="area-page-dot" style="background:${a.hex}"></div>
       <div>
         <div class="area-page-name">${a.name}</div>
-        <div class="area-page-code">${code} · ${areaT.length} tasks</div>
+        <div class="area-page-code">${code} · ${areaT.length} task${areaT.length !== 1 ? 's' : ''}</div>
       </div>
       <div style="margin-left:auto;display:flex;gap:8px">
         <button class="btn btn-primary" onclick="navigate('new-task',null);document.getElementById('nt-area').value='${code}'">+ Add Task</button>
@@ -1153,13 +1497,16 @@ function renderArea(code) {
             <th>Status</th><th>Start</th><th>Deadline</th><th>Urgency</th><th>Actions</th>
           </tr>
         </thead>
-        <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:32px">No tasks yet.</td></tr>'}</tbody>
+        <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:var(--subtle);padding:40px">No tasks yet.</td></tr>'}</tbody>
       </table>
     </div>
   `;
 }
 
-// ── WEEKLY REVIEW ──────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// WEEKLY REVIEW
+// ═══════════════════════════════════════════════════════════
+
 function renderWeekly() {
   const total     = tasks.length;
   const completed = tasks.filter(t => t.status==="Completed").length;
@@ -1183,20 +1530,20 @@ function renderWeekly() {
       const isDelayed = t.deadline < TODAY && !isDone;
       const isCarry   = ["Pending","Blocked"].includes(t.status);
       return `<tr>
-        <td class="task-col">${t.desc}</td>
-        <td style="font-weight:500;font-size:11px">${t.owner}</td>
+        <td class="task-col">${escHtml(t.desc)}</td>
+        <td style="font-weight:500;font-size:11px">${escHtml(t.owner)}</td>
         <td>${statusBadge(t.status)}</td>
-        <td style="font-family:var(--mono);font-size:10px;color:var(--muted)">${t.deadline||'—'}</td>
-        <td style="font-size:12px;text-align:center">${isDone ? '✅' : ''}</td>
+        <td style="font-family:var(--mono);font-size:10px;color:var(--subtle)">${t.deadline||'—'}</td>
+        <td style="font-size:12px;text-align:center">${isDone    ? '✅' : ''}</td>
         <td style="font-size:12px;text-align:center">${isDelayed ? '⚠️' : ''}</td>
-        <td style="font-size:12px;text-align:center">${isCarry ? '🔁' : ''}</td>
+        <td style="font-size:12px;text-align:center">${isCarry   ? '🔁' : ''}</td>
       </tr>`;
     }).join('');
 
     return `
       <div class="area-week-block">
         <div class="area-week-header">
-          <div class="area-week-tag" style="font-family:var(--mono);font-size:10px;font-weight:700;color:${a.hex}">${a.name.toUpperCase()}</div>
+          <div style="font-family:var(--mono);font-size:10px;font-weight:600;color:${a.hex};letter-spacing:.1em">${a.name.toUpperCase()}</div>
           <div class="mini-badges">
             <span class="badge badge-completed">✅ ${done.length}</span>
             <span class="badge badge-high">⚠️ ${delayed2.length}</span>
@@ -1206,13 +1553,13 @@ function renderWeekly() {
         <table class="area-week-table">
           <thead>
             <tr>
-              <th style="padding:7px 16px;background:var(--bg);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted)">Task</th>
-              <th style="padding:7px 16px;background:var(--bg);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted)">Owner</th>
-              <th style="padding:7px 16px;background:var(--bg);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted)">Status</th>
-              <th style="padding:7px 16px;background:var(--bg);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted)">Deadline</th>
-              <th style="padding:7px 16px;background:var(--bg);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);text-align:center">Done</th>
-              <th style="padding:7px 16px;background:var(--bg);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);text-align:center">Delay</th>
-              <th style="padding:7px 16px;background:var(--bg);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--muted);text-align:center">Carry</th>
+              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Task</th>
+              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Owner</th>
+              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Status</th>
+              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Deadline</th>
+              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Done</th>
+              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Delay</th>
+              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Carry</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
@@ -1227,21 +1574,66 @@ function renderWeekly() {
     ${areaBlocks}
   `;
 
-  // Placeholder behavior for contenteditable
+  // Placeholder behavior for contenteditable notes
   document.querySelectorAll('.note-area').forEach(el => {
     const ph = el.getAttribute('data-ph');
-    if (!el.textContent.trim()) el.textContent = ph;
-    el.style.color = 'var(--muted)';
+    if (!el.textContent.trim()) { el.textContent = ph; el.style.color = 'var(--subtle)'; }
     el.addEventListener('focus', () => {
       if (el.textContent === ph) { el.textContent = ''; el.style.color = 'var(--text)'; el.style.fontStyle = 'normal'; }
     });
     el.addEventListener('blur', () => {
-      if (!el.textContent.trim()) { el.textContent = ph; el.style.color = 'var(--muted)'; el.style.fontStyle = 'italic'; }
+      if (!el.textContent.trim()) { el.textContent = ph; el.style.color = 'var(--subtle)'; el.style.fontStyle = 'italic'; }
     });
   });
 }
 
-// ── CREATE TASK ────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// FILE HANDLING
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Reads a file input and updates preview UI.
+ * fileData is stored as base64 DataURL so the attachment survives in-memory.
+ */
+function handleFileSelect(input, previewId, nameId) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const preview  = document.getElementById(previewId);
+  const nameSpan = document.getElementById(nameId);
+
+  nameSpan.textContent = file.name;
+  preview.classList.add('visible');
+
+  // Store base64 on the input element for retrieval at createTask/saveEdit time
+  const reader = new FileReader();
+  reader.onload = e => { input._fileData = e.target.result; input._fileName = file.name; };
+  reader.readAsDataURL(file);
+}
+
+function removeFile(inputId, previewId, nameId) {
+  const input = document.getElementById(inputId);
+  input.value = '';
+  input._fileData = null;
+  input._fileName = null;
+  document.getElementById(previewId).classList.remove('visible');
+  document.getElementById(nameId).textContent = '';
+}
+
+/** Trigger browser download of stored file data. */
+function downloadFile(taskId) {
+  const t = tasks.find(x => x.id === taskId);
+  if (!t || !t.fileData) { toast("No file data available for download.", "error"); return; }
+  const a = document.createElement('a');
+  a.href = t.fileData;
+  a.download = t.file;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+// CREATE TASK
+// ═══════════════════════════════════════════════════════════
+
 function createTask() {
   const area     = document.getElementById('nt-area').value;
   const owner    = document.getElementById('nt-owner').value.trim();
@@ -1251,19 +1643,29 @@ function createTask() {
   const start    = document.getElementById('nt-start').value;
   const deadline = document.getElementById('nt-deadline').value;
   const comments = document.getElementById('nt-comments').value.trim();
+  const fileInput = document.getElementById('nt-file');
 
   if (!desc || !owner || !deadline) {
-    toast("Please fill in required fields (Description, Owner, Deadline).", "error");
+    toast("Please fill in required fields: Description, Owner, Deadline.", "error");
     return;
   }
 
   idCounters[area]++;
   const id = `${area}-${String(idCounters[area]).padStart(3,'0')}`;
-  tasks.push({ id, area, desc, owner, priority, status, start, deadline, comments });
+
+  const task = { id, area, desc, owner, priority, status, start, deadline, comments };
+
+  // Attach file data if present
+  if (fileInput._fileName) {
+    task.file     = fileInput._fileName;
+    task.fileData = fileInput._fileData;
+  }
+
+  tasks.push(task);
   updateNavBadges();
   toast(`Task ${id} created successfully.`, "success");
   resetNewTaskForm();
-  navigate('area-'+area, document.getElementById('nav-'+area));
+  navigate('area-' + area, document.getElementById('nav-' + area));
 }
 
 function resetNewTaskForm() {
@@ -1272,21 +1674,37 @@ function resetNewTaskForm() {
   document.getElementById('nt-status').value   = 'Pending';
   document.getElementById('nt-start').value    = '';
   document.getElementById('nt-deadline').value = '';
+  removeFile('nt-file','nt-file-preview','nt-file-name');
 }
 
-// ── EDIT MODAL ────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// EDIT MODAL
+// ═══════════════════════════════════════════════════════════
+
 function openEditModal(id) {
   const t = tasks.find(x => x.id === id);
   if (!t) return;
+
   document.getElementById('modalTitle').textContent = 'Edit Task';
   document.getElementById('modalSub').textContent   = id;
+
+  const filePreviewHtml = t.file
+    ? `<div class="file-preview visible" id="ed-file-preview">
+         <span class="file-name" id="ed-file-name">${escHtml(t.file)}</span>
+         <button class="file-remove" onclick="removeModalFile('${id}')" title="Remove file">×</button>
+       </div>`
+    : `<div class="file-preview" id="ed-file-preview">
+         <span class="file-name" id="ed-file-name"></span>
+         <button class="file-remove" onclick="removeModalFile('${id}')" title="Remove file">×</button>
+       </div>`;
+
   document.getElementById('modalBody').innerHTML = `
     <div class="form-grid full"><div class="form-field">
       <label>Task Description</label>
-      <input type="text" id="ed-desc" value="${t.desc}"/>
+      <input type="text" id="ed-desc" value="${escAttr(t.desc)}"/>
     </div></div>
     <div class="form-grid">
-      <div class="form-field"><label>Owner</label><input type="text" id="ed-owner" value="${t.owner}"/></div>
+      <div class="form-field"><label>Owner</label><input type="text" id="ed-owner" value="${escAttr(t.owner)}"/></div>
       <div class="form-field"><label>Area</label>
         <select id="ed-area">
           ${Object.entries(AREAS).map(([c,a]) => `<option value="${c}" ${t.area===c?'selected':''}>${a.name}</option>`).join('')}
@@ -1307,7 +1725,20 @@ function openEditModal(id) {
     </div>
     <div class="form-grid full"><div class="form-field">
       <label>Comments</label>
-      <textarea id="ed-comments">${t.comments||''}</textarea>
+      <textarea id="ed-comments">${escHtml(t.comments||'')}</textarea>
+    </div></div>
+    <div class="form-grid full"><div class="form-field">
+      <label>Attach / Replace File</label>
+      <div class="file-upload-zone" onclick="document.getElementById('ed-file').click()">
+        <input type="file" id="ed-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.xlsm"
+               onchange="handleFileSelect(this,'ed-file-preview','ed-file-name')"/>
+        <div class="upload-icon">📎</div>
+        <div class="upload-text">
+          <strong>Click to attach or replace</strong>
+          <div class="ext">.pdf · .doc · .docx · .xls · .xlsx · .xlsm</div>
+        </div>
+      </div>
+      ${filePreviewHtml}
     </div></div>
     <div class="form-actions">
       <button class="btn btn-primary" onclick="saveEdit('${id}')">Save Changes</button>
@@ -1317,9 +1748,20 @@ function openEditModal(id) {
   document.getElementById('modalOverlay').classList.add('open');
 }
 
+/** Remove file from task inside modal (before saving) */
+function removeModalFile(taskId) {
+  const t = tasks.find(x => x.id === taskId);
+  if (t) { t.file = null; t.fileData = null; }
+  const preview = document.getElementById('ed-file-preview');
+  if (preview) preview.classList.remove('visible');
+  const edFile = document.getElementById('ed-file');
+  if (edFile) { edFile.value=''; edFile._fileData=null; edFile._fileName=null; }
+}
+
 function saveEdit(id) {
   const t = tasks.find(x => x.id === id);
   if (!t) return;
+
   t.desc     = document.getElementById('ed-desc').value.trim();
   t.owner    = document.getElementById('ed-owner').value.trim();
   t.area     = document.getElementById('ed-area').value;
@@ -1328,6 +1770,14 @@ function saveEdit(id) {
   t.start    = document.getElementById('ed-start').value;
   t.deadline = document.getElementById('ed-deadline').value;
   t.comments = document.getElementById('ed-comments').value.trim();
+
+  // Update file if a new one was selected
+  const edFile = document.getElementById('ed-file');
+  if (edFile && edFile._fileName) {
+    t.file     = edFile._fileName;
+    t.fileData = edFile._fileData;
+  }
+
   closeModal();
   updateNavBadges();
   toast(`Task ${id} updated.`, "success");
@@ -1335,7 +1785,7 @@ function saveEdit(id) {
 }
 
 function deleteTask(id) {
-  if (!confirm(`Delete task ${id}?`)) return;
+  if (!confirm(`Delete task ${id}? This action cannot be undone.`)) return;
   tasks = tasks.filter(t => t.id !== id);
   updateNavBadges();
   toast(`Task ${id} deleted.`, "success");
@@ -1349,27 +1799,37 @@ document.getElementById('modalOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 });
 
-// ── TOAST ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+
 function toast(msg, type="success") {
   const t = document.createElement('div');
   t.className = `toast ${type}`;
   t.innerHTML = `<span>${type === "success" ? "✓" : "✕"}</span> ${msg}`;
   document.getElementById('toastContainer').appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(16px)'; t.style.transition='.3s ease'; }, 2800);
   setTimeout(() => t.remove(), 3200);
 }
 
-// ── NAV BADGES ────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// NAV BADGES
+// ═══════════════════════════════════════════════════════════
+
 function updateNavBadges() {
   Object.keys(AREAS).forEach(code => {
-    document.getElementById(`badge-${code}`).textContent = tasks.filter(t => t.area===code).length;
+    document.getElementById(`badge-${code}`).textContent = tasks.filter(t => t.area === code).length;
   });
 }
 
-// ── EXPORT ────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════════
+
 function exportData() {
-  const headers = ["ID","Area","Task","Owner","Priority","Status","Start","Deadline","Comments"];
-  const rows = tasks.map(t => [t.id,AREAS[t.area].name,t.desc,t.owner,t.priority,t.status,t.start,t.deadline,t.comments]);
-  const csv  = [headers, ...rows].map(r => r.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(",")).join("\n");
+  const headers = ["ID","Area","Task","Owner","Priority","Status","Start","Deadline","Comments","File"];
+  const rows = tasks.map(t => [t.id, AREAS[t.area].name, t.desc, t.owner, t.priority, t.status, t.start, t.deadline, t.comments, t.file||'']);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type:"text/csv" });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
@@ -1378,17 +1838,37 @@ function exportData() {
   toast("Export complete.", "success");
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// SECURITY HELPERS (prevent XSS in dynamic HTML)
+// ═══════════════════════════════════════════════════════════
+
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(str) {
+  return String(str||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+
 window.addEventListener('load', () => {
+  // Populate landing stats
+  document.getElementById('ls-total').textContent = tasks.length;
+  document.getElementById('ls-done').textContent  = tasks.filter(t=>t.status==="Completed").length;
+
   updateNavBadges();
-  renderDashboard();
-  // Set today's date as default for new task
+
+  // Set today as default start date
   document.getElementById('nt-start').value = TODAY;
+
+  // Remove loader
   setTimeout(() => {
     const loader = document.getElementById('loader');
     loader.classList.add('hidden');
     setTimeout(() => loader.remove(), 400);
-  }, 800);
+  }, 600);
 });
 </script>
 </body>
