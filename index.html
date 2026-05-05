@@ -610,7 +610,7 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 }
 
 </style>
-<!-- SheetJS — genera .xlsx real directamente desde el navegador -->
+<!-- SheetJS — genera .xlsx real desde el navegador -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -1590,211 +1590,230 @@ function updateNavBadges() {
 // ═══════════════════════════════════════════════════════════
 
 function exportData() {
+  const today = new Date().toISOString().slice(0, 10);
 
-  // ── Colores por PRIORIDAD (columna F) ─────────────────────────────
-  const PRIORITY_FILL = {
-    'Critical': { fgColor: { rgb: 'FFCCCC' } },
-    'High':     { fgColor: { rgb: 'FFDEDE' } },
-    'Medium':   { fgColor: { rgb: 'FFF3E0' } },
-    'Low':      { fgColor: { rgb: 'E8F5E9' } },
-  };
-  const PRIORITY_FONT = {
-    'Critical': { bold: true,  color: { rgb: 'AE2A19' } },
-    'High':     { bold: false, color: { rgb: 'AE2A19' } },
-    'Medium':   { bold: false, color: { rgb: 'C25100' } },
-    'Low':      { bold: false, color: { rgb: '1F845A' } },
-  };
+  // ─────────────────────────────────────────────────────────────────
+  // COLORES EXACTOS extraídos del archivo de referencia
+  // ─────────────────────────────────────────────────────────────────
 
-  // ── Colores por ESTADO (columna G) ────────────────────────────────
-  const STATUS_FILL = {
-    'Pending':     { fgColor: { rgb: 'F1F3F5' } },
-    'In Progress': { fgColor: { rgb: 'E9F2FF' } },
-    'Completed':   { fgColor: { rgb: 'DCFFF1' } },
-    'Blocked':     { fgColor: { rgb: 'FFECEB' } },
+  // Prioridad → fondo de la celda (col F)
+  // Critical: rojo  · High: naranja  · Medium: amarillo  · Low: verde claro
+  const PRIORITY_BG = {
+    'Critical': 'C00000',   // rojo oscuro
+    'High':     'FF9966',   // naranja
+    'Medium':   'FFFF99',   // amarillo suave
+    'Low':      'CCFFCC',   // verde claro
   };
-  const STATUS_FONT = {
-    'Pending':     { color: { rgb: '505F79' } },
-    'In Progress': { color: { rgb: '0C66E4' } },
-    'Completed':   { color: { rgb: '1F845A' } },
-    'Blocked':     { color: { rgb: 'AE2A19' } },
+  // Texto de prioridad siempre negro bold para legibilidad
+  const PRIORITY_FONT_COLOR = {
+    'Critical': '000000',
+    'High':     '000000',
+    'Medium':   '000000',
+    'Low':      '000000',
   };
 
-  // ── Estilos base ──────────────────────────────────────────────────
-  const borderSide = { style: 'thin', color: { rgb: 'DEE1E6' } };
-  const allBorders = { top: borderSide, bottom: borderSide, left: borderSide, right: borderSide };
+  // Estado → fondo de la celda (col G)
+  // Pending: sin color · In Progress: amarillo · Completed: verde · Blocked: rojo
+  const STATUS_BG = {
+    'Pending':     null,       // sin relleno
+    'In Progress': 'FFFF00',   // amarillo
+    'Completed':   '00B050',   // verde
+    'Blocked':     'C00000',   // rojo
+  };
+  const STATUS_FONT_COLOR = {
+    'Pending':     '505F79',
+    'In Progress': '000000',
+    'Completed':   'FFFFFF',   // texto blanco sobre verde
+    'Blocked':     'FFFFFF',   // texto blanco sobre rojo
+  };
 
-  function baseCell(value, extra = {}) {
-    return {
-      v: value,
-      t: typeof value === 'number' ? 'n' : 's',
-      s: {
-        font:      { name: 'Calibri', sz: 11, ...(extra.font || {}) },
-        fill:      extra.fill ? { patternType: 'solid', ...extra.fill } : { patternType: 'none' },
-        alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
-        border:    allBorders,
-      }
+  // ─────────────────────────────────────────────────────────────────
+  // HELPERS DE ESTILO
+  // ─────────────────────────────────────────────────────────────────
+  const border = { style: 'thin', color: { rgb: 'BFBFBF' } };
+  const allBorders = { top: border, bottom: border, left: border, right: border };
+
+  // Celda base: Calibri 12, centrado, borde fino
+  function cell(value, opts = {}) {
+    const s = {
+      font: {
+        name: 'Calibri', sz: 12,
+        bold:  opts.bold  || false,
+        color: { rgb: opts.fontColor || '000000' },
+      },
+      alignment: {
+        horizontal: opts.alignH || 'center',
+        vertical:   'center',
+        wrapText:   opts.wrap || false,
+      },
+      border: allBorders,
     };
+    if (opts.bg) {
+      s.fill = { patternType: 'solid', fgColor: { rgb: opts.bg } };
+    }
+    return { v: value ?? '', t: typeof value === 'number' ? 'n' : 's', s };
   }
 
-  function headerCell(value) {
-    return {
-      v: value, t: 's',
-      s: {
-        font:      { name: 'Calibri', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
-        fill:      { patternType: 'solid', fgColor: { rgb: '172B4D' } },
-        alignment: { horizontal: 'center', vertical: 'center' },
-        border:    allBorders,
-      }
-    };
-  }
-
+  // Celda de título (fila 1, hoja All Tasks)
+  // Calibri 16 bold, sin color de fondo especial (igual al original)
   function titleCell(value) {
     return {
       v: value, t: 's',
       s: {
-        font:      { name: 'Calibri', sz: 13, bold: true, color: { rgb: 'FFFFFF' } },
-        fill:      { patternType: 'solid', fgColor: { rgb: '0C66E4' } },
+        font:      { name: 'Calibri', sz: 16, bold: true },
         alignment: { horizontal: 'center', vertical: 'center' },
         border:    allBorders,
       }
     };
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const wb    = XLSX.utils.book_new();
-
-  // ── Hoja "All Tasks" + una hoja por área ──────────────────────────
-  const sheets = [
-    { name: 'All Tasks', list: tasks },
-    ...Object.entries(AREAS)
-      .map(([code, a]) => ({ name: a.name, list: tasks.filter(t => t.area === code) }))
-      .filter(s => s.list.length > 0)
-  ];
-
-  sheets.forEach(({ name, list }) => {
-    const ws   = {};
-    const COLS = ['A','B','C','D','E','F','G','H','I','J','K'];
-
-    // Fila 1 — título fusionado B1:K1
-    ws['B1'] = titleCell(`${name}   ·   Exported: ${today}`);
-    ['C','D','E','F','G','H','I','J','K'].forEach(col => {
-      ws[`${col}1`] = {
-        v: '', t: 's',
-        s: {
-          font:  { name: 'Calibri', sz: 13, bold: true, color: { rgb: 'FFFFFF' } },
-          fill:  { patternType: 'solid', fgColor: { rgb: '0C66E4' } },
-          alignment: { horizontal: 'center', vertical: 'center' },
-          border: allBorders,
-        }
-      };
-    });
-    // Celda A1 vacía con mismo fondo
-    ws['A1'] = {
-      v: '', t: 's',
-      s: { fill: { patternType: 'solid', fgColor: { rgb: '0C66E4' } }, border: allBorders }
+  // Celda de header (fila 2)
+  function headerCell(value) {
+    return {
+      v: value, t: 's',
+      s: {
+        font:      { name: 'Calibri', sz: 12, bold: true },
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border:    allBorders,
+      }
     };
+  }
 
-    // Fila 2 — headers
-    ['#','ID','Area','Task','Owner','Priority','Status','Start Date','Deadline','Comments','File']
-      .forEach((h, i) => { ws[`${COLS[i]}2`] = headerCell(h); });
+  // ─────────────────────────────────────────────────────────────────
+  // ANCHOS DE COLUMNA (replicados del archivo original)
+  // ─────────────────────────────────────────────────────────────────
+  const COL_WIDTHS = [
+    { wch: 4.9  },   // A — #
+    { wch: 11.9 },   // B — ID
+    { wch: 13.9 },   // C — Area
+    { wch: 40.9 },   // D — Task
+    { wch: 21.8 },   // E — Owner
+    { wch: 14.9 },   // F — Priority
+    { wch: 14.0 },   // G — Status
+    { wch: 12.9 },   // H — Start Date
+    { wch: 12.0 },   // I — Deadline
+    { wch: 30.9 },   // J — Comments
+    { wch: 22.9 },   // K — File
+  ];
+  const COLS = ['A','B','C','D','E','F','G','H','I','J','K'];
 
-    // Filas de datos desde fila 3
-    list.forEach((t, idx) => {
-      const row   = idx + 3;
-      const rowBg = idx % 2 === 0
-        ? { patternType: 'solid', fgColor: { rgb: 'FFFFFF' } }
-        : { patternType: 'solid', fgColor: { rgb: 'F8F9FA' } };
+  // ─────────────────────────────────────────────────────────────────
+  // FUNCIÓN QUE CONSTRUYE CADA HOJA
+  // ─────────────────────────────────────────────────────────────────
+  function buildSheet(taskList, sheetTitle, isAllTasks) {
+    const ws = {};
 
-      // A — número
-      ws[`A${row}`] = baseCell(idx + 1, { font: { bold: true }, fill: rowBg });
+    // ── Fila 1 ──────────────────────────────────────────────────────
+    if (isAllTasks) {
+      // "All Tasks": título bold 16 en A1, fusionado A1:K1
+      ws['A1'] = titleCell(sheetTitle);
+      // Celdas vacías del merge con mismo borde
+      ['B','C','D','E','F','G','H','I','J','K'].forEach(c => {
+        ws[`${c}1`] = { v: '', t: 's', s: { border: allBorders } };
+      });
+    } else {
+      // Hojas de área: fila 1 vacía sin formato (igual al original)
+      COLS.forEach(c => { ws[`${c}1`] = { v: '', t: 's' }; });
+    }
+
+    // ── Fila 2: Headers ─────────────────────────────────────────────
+    const HEADERS = ['#','ID','Area','Task','Owner','Priority','Status','Start Date','Deadline','Comments','File'];
+    HEADERS.forEach((h, i) => { ws[`${COLS[i]}2`] = headerCell(h); });
+
+    // ── Filas de datos desde fila 3 ─────────────────────────────────
+    taskList.forEach((t, idx) => {
+      const row = idx + 3;
+
+      // A — número de fila
+      ws[`A${row}`] = cell(idx + 1, { bold: false });
 
       // B — ID
-      ws[`B${row}`] = baseCell(t.id || '', { fill: rowBg });
+      ws[`B${row}`] = cell(t.id || '');
 
       // C — Area
-      ws[`C${row}`] = baseCell(AREAS[t.area] ? AREAS[t.area].name : t.area, { fill: rowBg });
+      ws[`C${row}`] = cell(AREAS[t.area] ? AREAS[t.area].name : (t.area || ''));
 
       // D — Task (alineación izquierda)
-      ws[`D${row}`] = {
-        v: t.desc || '', t: 's',
-        s: {
-          font:      { name: 'Calibri', sz: 11 },
-          fill:      rowBg,
-          alignment: { horizontal: 'left', vertical: 'center', wrapText: false },
-          border:    allBorders,
-        }
-      };
+      ws[`D${row}`] = cell(t.desc || '', { alignH: 'left' });
 
       // E — Owner
-      ws[`E${row}`] = baseCell(t.owner || '', { fill: rowBg });
+      ws[`E${row}`] = cell(t.owner || '');
 
-      // F — Priority con color
-      const pFill = PRIORITY_FILL[t.priority] || { fgColor: { rgb: 'F1F3F5' } };
-      const pFont = PRIORITY_FONT[t.priority] || {};
-      ws[`F${row}`] = baseCell(t.priority || '', {
-        fill: { patternType: 'solid', ...pFill },
-        font: pFont,
-      });
+      // F — Priority con color exacto del archivo original
+      const pBg   = PRIORITY_BG[t.priority]        || null;
+      const pFont = PRIORITY_FONT_COLOR[t.priority] || '000000';
+      ws[`F${row}`] = cell(t.priority || '', { bg: pBg, fontColor: pFont, bold: t.priority === 'Critical' });
 
-      // G — Status con color
-      const sFill = STATUS_FILL[t.status] || { fgColor: { rgb: 'F1F3F5' } };
-      const sFont = STATUS_FONT[t.status] || {};
-      ws[`G${row}`] = baseCell(t.status || '', {
-        fill: { patternType: 'solid', ...sFill },
-        font: sFont,
-      });
+      // G — Status con color exacto del archivo original
+      const sBg   = STATUS_BG[t.status]        || null;
+      const sFont = STATUS_FONT_COLOR[t.status] || '000000';
+      ws[`G${row}`] = cell(t.status || '', { bg: sBg, fontColor: sFont });
 
       // H — Start Date
-      ws[`H${row}`] = baseCell(t.start || '', { fill: rowBg });
+      ws[`H${row}`] = cell(t.start || '');
 
       // I — Deadline (rojo si vencida y no completada)
-      const isOverdue = t.deadline && t.deadline < today && t.status !== 'Completed';
-      ws[`I${row}`] = baseCell(t.deadline || '', {
-        fill: isOverdue ? { patternType: 'solid', fgColor: { rgb: 'FFECEB' } } : rowBg,
-        font: isOverdue ? { color: { rgb: 'AE2A19' }, bold: true } : {},
+      const overdue = t.deadline && t.deadline < today && t.status !== 'Completed';
+      ws[`I${row}`] = cell(t.deadline || '', {
+        bg:        overdue ? 'C00000' : null,
+        fontColor: overdue ? 'FFFFFF' : '000000',
+        bold:      overdue,
       });
 
-      // J — Comments (alineación izquierda, texto wrap)
-      ws[`J${row}`] = {
-        v: t.comments || '', t: 's',
-        s: {
-          font:      { name: 'Calibri', sz: 11, color: { rgb: '505F79' } },
-          fill:      rowBg,
-          alignment: { horizontal: 'left', vertical: 'center', wrapText: true },
-          border:    allBorders,
-        }
-      };
+      // J — Comments (izquierda, wrap)
+      ws[`J${row}`] = cell(t.comments || '', { alignH: 'left', wrap: true });
 
       // K — File
-      ws[`K${row}`] = baseCell(t.file || '', {
-        fill: rowBg,
-        font: t.file ? { color: { rgb: '0C66E4' } } : {},
+      ws[`K${row}`] = cell(t.file || '', {
+        fontColor: t.file ? '0C66E4' : '000000',
       });
     });
 
-    // Rango total, merges, anchos y alturas
-    ws['!ref']    = `A1:K${list.length + 2}`;
-    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }]; // A1:K1
-    ws['!cols']   = [
-      { wch: 4  },  // A — #
-      { wch: 11 },  // B — ID
-      { wch: 13 },  // C — Area
-      { wch: 40 },  // D — Task
-      { wch: 18 },  // E — Owner
-      { wch: 14 },  // F — Priority
-      { wch: 14 },  // G — Status
-      { wch: 12 },  // H — Start Date
-      { wch: 12 },  // I — Deadline
-      { wch: 30 },  // J — Comments
-      { wch: 22 },  // K — File
+    // ── Rango, merges, anchos, alturas ──────────────────────────────
+    const lastRow   = taskList.length + 2;
+    ws['!ref']      = `A1:K${lastRow}`;
+    ws['!cols']     = COL_WIDTHS;
+    ws['!rows']     = [
+      { hpt: isAllTasks ? 24 : 14 },  // fila 1
+      { hpt: 18 },                     // fila 2 headers
+      ...taskList.map(() => ({ hpt: 16 })),
     ];
-    const rowHeights = [{ hpt: 24 }, { hpt: 20 }];
-    list.forEach(() => rowHeights.push({ hpt: 18 }));
-    ws['!rows'] = rowHeights;
 
-    XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
+    if (isAllTasks) {
+      // Merge A1:K1 (fila 1, columnas 0-10, 0-indexed)
+      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }];
+    }
+
+    return ws;
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // CONSTRUIR WORKBOOK
+  // ─────────────────────────────────────────────────────────────────
+  const wb = XLSX.utils.book_new();
+
+  // Hoja 1 — All Tasks
+  XLSX.utils.book_append_sheet(
+    wb,
+    buildSheet(tasks, 'Operation Assistant', true),
+    'All Tasks'
+  );
+
+  // Una hoja por área (solo si tiene tareas)
+  Object.entries(AREAS).forEach(([code, area]) => {
+    const list = tasks.filter(t => t.area === code);
+    if (list.length > 0) {
+      XLSX.utils.book_append_sheet(
+        wb,
+        buildSheet(list, area.name, false),
+        area.name.slice(0, 31)
+      );
+    }
   });
 
+  // ─────────────────────────────────────────────────────────────────
+  // DESCARGAR
+  // ─────────────────────────────────────────────────────────────────
   XLSX.writeFile(wb, `OperationAssistant_${today}.xlsx`);
   toast("Export complete.", "success");
 }
