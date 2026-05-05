@@ -11,7 +11,6 @@
    DESIGN TOKENS
 ═══════════════════════════════════════════════════════════ */
 :root {
-  /* Greys — primary palette */
   --white:     #ffffff;
   --grey-50:   #f8f9fa;
   --grey-100:  #f1f3f5;
@@ -26,7 +25,6 @@
   --grey-900:  #172b4d;
   --black:     #091e42;
 
-  /* Surface stack */
   --bg:        #f8f9fa;
   --surface:   #ffffff;
   --card:      #ffffff;
@@ -36,15 +34,13 @@
   --muted:     #6b778c;
   --subtle:    #97a0af;
 
-  /* Status colors — kept from original */
-  --accent:    #0c66e4;   /* blue  — in progress / brand */
-  --green:     #1f845a;   /* completed */
-  --orange:    #c25100;   /* medium priority / carry-over */
-  --red:       #ae2a19;   /* blocked / critical */
-  --purple:    #5e4db2;   /* projects */
-  --yellow:    #7f5f01;   /* warning */
+  --accent:    #0c66e4;
+  --green:     #1f845a;
+  --orange:    #c25100;
+  --red:       #ae2a19;
+  --purple:    #5e4db2;
+  --yellow:    #7f5f01;
 
-  /* Status backgrounds (softer) */
   --accent-bg: #e9f2ff;
   --green-bg:  #dcfff1;
   --orange-bg: #fff3eb;
@@ -52,14 +48,12 @@
   --purple-bg: #f3f0ff;
   --yellow-bg: #fff7d6;
 
-  /* Typography */
   --mono:      'DM Mono', monospace;
   --sans:      'DM Sans', sans-serif;
   --radius:    8px;
   --radius-lg: 12px;
   --transition: 160ms cubic-bezier(.4,0,.2,1);
 
-  /* Shadows */
   --shadow-sm: 0 1px 3px rgba(9,30,66,.08), 0 0 0 1px rgba(9,30,66,.04);
   --shadow-md: 0 4px 16px rgba(9,30,66,.10), 0 0 0 1px rgba(9,30,66,.04);
   --shadow-lg: 0 12px 40px rgba(9,30,66,.14);
@@ -69,9 +63,7 @@
    RESET & BASE
 ═══════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 html { scroll-behavior: smooth; }
-
 body {
   font-family: var(--sans);
   background: var(--bg);
@@ -104,10 +96,36 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-label {
   font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: .1em;
+  font-size: 11px; color: var(--muted); letter-spacing: .1em;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   DB STATUS INDICATOR (top-right corner)
+═══════════════════════════════════════════════════════════ */
+.db-status {
+  position: fixed; top: 14px; right: 20px;
+  z-index: 9100;
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .1em;
+  color: var(--subtle); text-transform: uppercase;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  box-shadow: var(--shadow-sm);
+  transition: opacity .3s;
+  opacity: 0;
+}
+.db-status.visible { opacity: 1; }
+.db-status .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--subtle);
+  transition: background .3s;
+}
+.db-status.ok   .dot { background: var(--green); }
+.db-status.err  .dot { background: var(--red); }
+.db-status.sync .dot { background: var(--orange); animation: blink .8s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 
 /* ═══════════════════════════════════════════════════════════
    LANDING PAGE
@@ -122,14 +140,10 @@ body {
   transition: opacity .5s ease, transform .5s ease;
 }
 #landing.hidden {
-  opacity: 0;
-  transform: translateY(-16px);
-  pointer-events: none;
+  opacity: 0; transform: translateY(-16px); pointer-events: none;
 }
-
 .landing-inner {
-  max-width: 520px;
-  width: 100%;
+  max-width: 520px; width: 100%;
   text-align: center;
   animation: fadeUp .6s ease both;
 }
@@ -137,99 +151,64 @@ body {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: none; }
 }
-
 .landing-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--mono);
-  font-size: 10px; font-weight: 500;
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
   letter-spacing: .14em; text-transform: uppercase;
-  color: var(--accent);
-  background: var(--accent-bg);
+  color: var(--accent); background: var(--accent-bg);
   border: 1px solid rgba(12,102,228,.15);
-  padding: 5px 12px;
-  border-radius: 20px;
-  margin-bottom: 28px;
+  padding: 5px 12px; border-radius: 20px; margin-bottom: 28px;
 }
 .landing-badge::before {
-  content: '';
-  display: block;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
+  content: ''; display: block; width: 6px; height: 6px;
+  border-radius: 50%; background: var(--accent);
   animation: pulse 2s ease infinite;
 }
-@keyframes pulse {
-  0%,100% { opacity: 1; }
-  50%      { opacity: .3; }
-}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
 .landing-title {
-  font-size: clamp(28px, 5vw, 40px);
-  font-weight: 700;
-  color: var(--black);
-  line-height: 1.15;
-  letter-spacing: -.02em;
-  margin-bottom: 16px;
+  font-size: clamp(28px, 5vw, 40px); font-weight: 700;
+  color: var(--black); line-height: 1.15;
+  letter-spacing: -.02em; margin-bottom: 16px;
 }
 .landing-title span { color: var(--accent); }
-
 .landing-desc {
-  font-size: 15px;
-  color: var(--muted);
-  line-height: 1.65;
-  margin-bottom: 36px;
-  max-width: 400px;
+  font-size: 15px; color: var(--muted); line-height: 1.65;
+  margin-bottom: 36px; max-width: 400px;
   margin-left: auto; margin-right: auto;
 }
-
 .landing-cta {
   display: inline-flex; align-items: center; gap: 10px;
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--sans);
-  font-size: 14px; font-weight: 600;
-  padding: 14px 32px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  border: none;
+  background: var(--accent); color: #fff;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  padding: 14px 32px; border-radius: var(--radius);
+  cursor: pointer; border: none;
   transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
   box-shadow: 0 2px 8px rgba(12,102,228,.35);
-  letter-spacing: -.01em;
 }
-.landing-cta:hover {
-  background: #0055cc;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(12,102,228,.4);
-}
-.landing-cta:active { transform: translateY(0); }
+.landing-cta:hover { background: #0055cc; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(12,102,228,.4); }
+.landing-cta:active { transform: none; }
 .landing-cta svg { transition: transform var(--transition); }
 .landing-cta:hover svg { transform: translateX(3px); }
 
 .landing-stats {
   display: flex; align-items: center; justify-content: center;
-  gap: 32px; margin-top: 48px;
-  padding-top: 32px;
+  gap: 32px; margin-top: 48px; padding-top: 32px;
   border-top: 1px solid var(--border);
 }
-.landing-stat {
-  text-align: center;
-  animation: fadeUp .6s ease both;
-}
+.landing-stat { text-align: center; animation: fadeUp .6s ease both; }
 .landing-stat:nth-child(2) { animation-delay: .1s; }
 .landing-stat:nth-child(3) { animation-delay: .2s; }
-
-.landing-stat .val {
-  font-family: var(--mono);
-  font-size: 22px; font-weight: 500;
-  color: var(--black);
-}
-.landing-stat .lbl {
-  font-size: 11px;
-  color: var(--subtle);
-  margin-top: 2px;
-}
-
+.landing-stat .val { font-family: var(--mono); font-size: 22px; font-weight: 500; color: var(--black); }
+.landing-stat .lbl { font-size: 11px; color: var(--subtle); margin-top: 2px; }
 .landing-divider { width: 1px; height: 36px; background: var(--border); }
+
+.landing-credit {
+  margin-top: 32px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: .1em; color: var(--subtle);
+  text-transform: uppercase;
+}
 
 /* ═══════════════════════════════════════════════════════════
    APP LAYOUT
@@ -242,253 +221,137 @@ body {
    SIDEBAR
 ═══════════════════════════════════════════════════════════ */
 .sidebar {
-  width: 224px;
-  flex-shrink: 0;
+  width: 224px; flex-shrink: 0;
   background: var(--surface);
   border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-  z-index: 200;
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; z-index: 200;
 }
-
 .sidebar-logo {
   padding: 20px 18px 18px;
   border-bottom: 1px solid var(--border);
 }
 .sidebar-logo .mark {
-  font-family: var(--mono);
-  font-size: 9px; font-weight: 500;
-  color: var(--accent);
-  letter-spacing: .14em; text-transform: uppercase;
-  margin-bottom: 3px;
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  color: var(--accent); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 3px;
 }
-.sidebar-logo .name {
-  font-size: 13px; font-weight: 700;
-  color: var(--text);
-  letter-spacing: -.01em;
-}
+.sidebar-logo .name { font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
 
 .nav-section { padding: 16px 12px 0; }
 .nav-label {
-  font-family: var(--mono);
-  font-size: 9px; font-weight: 500;
-  color: var(--subtle);
-  letter-spacing: .12em; text-transform: uppercase;
-  padding: 0 6px;
-  margin-bottom: 4px;
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  color: var(--subtle); letter-spacing: .12em; text-transform: uppercase;
+  padding: 0 6px; margin-bottom: 4px;
 }
 .nav-item {
   display: flex; align-items: center; gap: 9px;
-  padding: 8px 10px;
-  border-radius: var(--radius);
+  padding: 8px 10px; border-radius: var(--radius);
   cursor: pointer;
   transition: background var(--transition), color var(--transition);
-  font-size: 13px; font-weight: 400;
-  color: var(--muted);
-  margin-bottom: 1px;
-  user-select: none;
-  position: relative;
+  font-size: 13px; font-weight: 400; color: var(--muted);
+  margin-bottom: 1px; user-select: none;
 }
 .nav-item:hover { background: var(--grey-100); color: var(--text); }
-.nav-item.active {
-  background: var(--accent-bg);
-  color: var(--accent);
-  font-weight: 600;
-}
-.nav-item .dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  flex-shrink: 0;
-  opacity: .7;
-}
+.nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 600; }
+.nav-item .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; opacity: .7; }
 .nav-item.active .dot { opacity: 1; }
 .nav-item .badge {
-  margin-left: auto;
-  background: var(--grey-150);
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 9px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  min-width: 20px;
-  text-align: center;
+  margin-left: auto; background: var(--grey-150); color: var(--muted);
+  font-family: var(--mono); font-size: 9px;
+  padding: 2px 6px; border-radius: 10px; min-width: 20px; text-align: center;
 }
-.nav-item.active .badge {
-  background: rgba(12,102,228,.12);
-  color: var(--accent);
-}
+.nav-item.active .badge { background: rgba(12,102,228,.12); color: var(--accent); }
 
 .sidebar-footer {
-  margin-top: auto;
-  padding: 16px 18px;
+  margin-top: auto; padding: 16px 18px;
   border-top: 1px solid var(--border);
 }
-.sidebar-footer .user {
-  font-size: 12px; font-weight: 600;
-  color: var(--text);
-  margin-bottom: 2px;
-}
+.sidebar-footer .user { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
 .sidebar-footer .role {
-  font-family: var(--mono);
-  font-size: 9px; font-weight: 500;
-  color: var(--accent);
-  letter-spacing: .1em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  color: var(--accent); letter-spacing: .1em; text-transform: uppercase;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MAIN AREA
+   MAIN
 ═══════════════════════════════════════════════════════════ */
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 
-/* ── TOPBAR ── */
 .topbar {
-  height: 56px;
-  background: var(--surface);
+  height: 56px; background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 12px;
   padding: 0 24px;
   position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 1px 0 var(--border);
 }
-.topbar-title {
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 500;
-  color: var(--subtle);
-  letter-spacing: .08em;
-}
+.topbar-title { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--subtle); letter-spacing: .08em; }
 .topbar-breadcrumb { font-size: 12px; color: var(--muted); }
 .topbar-breadcrumb span { color: var(--text); font-weight: 500; }
 .topbar-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 
-/* ── BUTTONS ── */
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════ */
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 16px;
-  border-radius: var(--radius);
-  font-family: var(--sans);
-  font-size: 13px; font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition);
-  border: 1px solid transparent;
-  white-space: nowrap;
+  padding: 7px 16px; border-radius: var(--radius);
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all var(--transition);
+  border: 1px solid transparent; white-space: nowrap;
 }
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-  box-shadow: 0 1px 3px rgba(12,102,228,.25);
-}
-.btn-primary:hover {
-  background: #0055cc;
-  box-shadow: 0 2px 8px rgba(12,102,228,.35);
-  transform: translateY(-1px);
-}
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 1px 3px rgba(12,102,228,.25); }
+.btn-primary:hover { background: #0055cc; box-shadow: 0 2px 8px rgba(12,102,228,.35); transform: translateY(-1px); }
 .btn-primary:active { transform: none; }
-.btn-ghost {
-  background: transparent;
-  color: var(--muted);
-  border-color: var(--border2);
-}
+.btn-ghost { background: transparent; color: var(--muted); border-color: var(--border2); }
 .btn-ghost:hover { background: var(--grey-100); color: var(--text); border-color: var(--grey-300); }
-.btn-danger {
-  background: transparent;
-  color: var(--red);
-  border-color: rgba(174,42,25,.25);
-}
+.btn-danger { background: transparent; color: var(--red); border-color: rgba(174,42,25,.25); }
 .btn-danger:hover { background: var(--red-bg); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
 
-/* ── CONTENT ── */
 .content { flex: 1; padding: 28px; overflow-x: hidden; }
 
-/* ── VIEWS ── */
 .view { display: none; }
 .view.active { display: block; animation: fadeSlide .22s ease; }
-@keyframes fadeSlide {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: none; }
-}
+@keyframes fadeSlide { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 
 /* ═══════════════════════════════════════════════════════════
    KPI ROW
 ═══════════════════════════════════════════════════════════ */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 28px;
-}
+.kpi-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 28px; }
 .kpi-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px 18px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 18px;
   transition: box-shadow var(--transition), transform var(--transition);
   box-shadow: var(--shadow-sm);
 }
-.kpi-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-.kpi-card .kpi-label {
-  font-family: var(--mono);
-  font-size: 9px; font-weight: 500;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: var(--subtle);
-  margin-bottom: 8px;
-}
-.kpi-card .kpi-value {
-  font-family: var(--mono);
-  font-size: 30px; font-weight: 500;
-  line-height: 1;
-}
-.kpi-card .kpi-sub {
-  font-size: 11px; color: var(--subtle); margin-top: 4px;
-}
+.kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.kpi-card .kpi-label { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--subtle); margin-bottom: 8px; }
+.kpi-card .kpi-value { font-family: var(--mono); font-size: 30px; font-weight: 500; line-height: 1; }
+.kpi-card .kpi-sub { font-size: 11px; color: var(--subtle); margin-top: 4px; }
 
 /* ═══════════════════════════════════════════════════════════
    SECTION HEADER
 ═══════════════════════════════════════════════════════════ */
-.section-header {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 16px;
-}
-.section-title {
-  font-size: 11px; font-weight: 600;
-  letter-spacing: .06em; text-transform: uppercase;
-  color: var(--subtle);
-  white-space: nowrap;
-}
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.section-title { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--subtle); white-space: nowrap; }
 .section-line { flex: 1; height: 1px; background: var(--border); }
 
 /* ═══════════════════════════════════════════════════════════
    FILTERS
 ═══════════════════════════════════════════════════════════ */
-.filters {
-  display: flex; gap: 8px;
-  margin-bottom: 14px; flex-wrap: wrap;
-}
+.filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .filter-select {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: var(--sans); font-size: 13px;
-  padding: 7px 10px;
-  border-radius: var(--radius);
-  cursor: pointer; outline: none;
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 7px 10px; border-radius: var(--radius); cursor: pointer; outline: none;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .filter-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(12,102,228,.1); }
 .search-input {
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: var(--sans); font-size: 13px;
-  padding: 7px 14px;
-  border-radius: var(--radius); outline: none;
-  width: 240px;
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 7px 14px; border-radius: var(--radius); outline: none; width: 240px;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .search-input::placeholder { color: var(--subtle); }
@@ -498,29 +361,18 @@ body {
    TABLE
 ═══════════════════════════════════════════════════════════ */
 .table-wrap {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  margin-bottom: 28px;
-  box-shadow: var(--shadow-sm);
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  margin-bottom: 28px; box-shadow: var(--shadow-sm);
 }
 table { width: 100%; border-collapse: collapse; }
 thead th {
-  background: var(--grey-50);
-  font-family: var(--mono);
-  font-size: 9px; font-weight: 500;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: var(--subtle);
-  padding: 11px 14px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+  background: var(--grey-50); font-family: var(--mono);
+  font-size: 9px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--subtle); padding: 11px 14px; text-align: left;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
 }
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background var(--transition);
-}
+tbody tr { border-bottom: 1px solid var(--border); transition: background var(--transition); }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: var(--grey-50); }
 tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
@@ -530,179 +382,111 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 ═══════════════════════════════════════════════════════════ */
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 9px;
-  border-radius: 5px;
-  font-family: var(--mono);
-  font-size: 10px; font-weight: 500;
-  white-space: nowrap;
+  padding: 3px 9px; border-radius: 5px;
+  font-family: var(--mono); font-size: 10px; font-weight: 500; white-space: nowrap;
 }
-/* Status */
-.badge-pending    { background: var(--grey-100);  color: var(--grey-600); }
-.badge-progress   { background: var(--accent-bg); color: var(--accent); }
-.badge-completed  { background: var(--green-bg);  color: var(--green); }
-.badge-blocked    { background: var(--red-bg);    color: var(--red); }
-/* Priority */
-.badge-high       { background: var(--red-bg);    color: var(--red); }
-.badge-critical   { background: var(--red-bg);    color: var(--red); font-weight: 700; }
-.badge-medium     { background: var(--orange-bg); color: var(--orange); }
-.badge-low        { background: var(--green-bg);  color: var(--green); }
-/* Area */
-.badge-area-acc   { background: var(--accent-bg); color: var(--accent); }
-.badge-area-opc   { background: var(--green-bg);  color: var(--green); }
-.badge-area-fin   { background: var(--orange-bg); color: var(--orange); }
-.badge-area-opp   { background: var(--purple-bg); color: var(--purple); }
-.badge-area-hr    { background: var(--red-bg);    color: var(--red); }
+.badge-pending   { background: var(--grey-100);  color: var(--grey-600); }
+.badge-progress  { background: var(--accent-bg); color: var(--accent); }
+.badge-completed { background: var(--green-bg);  color: var(--green); }
+.badge-blocked   { background: var(--red-bg);    color: var(--red); }
+.badge-high      { background: var(--red-bg);    color: var(--red); }
+.badge-critical  { background: var(--red-bg);    color: var(--red); font-weight: 700; }
+.badge-medium    { background: var(--orange-bg); color: var(--orange); }
+.badge-low       { background: var(--green-bg);  color: var(--green); }
+.badge-area-acc  { background: var(--accent-bg); color: var(--accent); }
+.badge-area-opc  { background: var(--green-bg);  color: var(--green); }
+.badge-area-fin  { background: var(--orange-bg); color: var(--orange); }
+.badge-area-opp  { background: var(--purple-bg); color: var(--purple); }
+.badge-area-hr   { background: var(--red-bg);    color: var(--red); }
 
-/* Urgency */
 .urgency-overdue { color: var(--red);    font-family: var(--mono); font-size: 11px; font-weight: 500; }
 .urgency-soon    { color: var(--orange); font-family: var(--mono); font-size: 11px; }
 .urgency-ok      { color: var(--green);  font-family: var(--mono); font-size: 11px; }
 
 /* ═══════════════════════════════════════════════════════════
-   TASK DESCRIPTION CELL
+   TASK CELL
 ═══════════════════════════════════════════════════════════ */
 .task-desc { max-width: 300px; }
 .task-desc .title { font-weight: 500; color: var(--text); margin-bottom: 2px; }
-.task-desc .sub { font-size: 11.5px; color: var(--subtle); }
+.task-desc .sub   { font-size: 11.5px; color: var(--subtle); }
 .task-desc .file-tag {
   display: inline-flex; align-items: center; gap: 4px;
-  font-size: 10.5px; color: var(--accent);
-  background: var(--accent-bg);
+  font-size: 10.5px; color: var(--accent); background: var(--accent-bg);
   padding: 1px 7px; border-radius: 4px; margin-top: 4px;
-  cursor: pointer;
-  transition: background var(--transition);
+  cursor: pointer; transition: background var(--transition);
 }
 .task-desc .file-tag:hover { background: rgba(12,102,228,.15); }
 
 /* ═══════════════════════════════════════════════════════════
    FORM
 ═══════════════════════════════════════════════════════════ */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px; margin-bottom: 20px;
-}
+.form-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 18px; margin-bottom: 20px; }
 .form-grid.full { grid-template-columns: 1fr; }
-.form-grid.three { grid-template-columns: repeat(3, 1fr); }
-
 .form-field { display: flex; flex-direction: column; gap: 6px; }
-.form-field label {
-  font-size: 11px; font-weight: 600;
-  letter-spacing: .04em; text-transform: uppercase;
-  color: var(--muted);
-}
+.form-field label { font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 .form-field input,
 .form-field select,
 .form-field textarea {
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  color: var(--text);
-  font-family: var(--sans); font-size: 13px;
-  padding: 9px 12px;
-  border-radius: var(--radius); outline: none;
+  background: var(--bg); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--sans); font-size: 13px;
+  padding: 9px 12px; border-radius: var(--radius); outline: none;
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .form-field input:focus,
 .form-field select:focus,
-.form-field textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(12,102,228,.1);
-}
+.form-field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(12,102,228,.1); }
 .form-field textarea { resize: vertical; min-height: 80px; }
 .form-field input::placeholder,
 .form-field textarea::placeholder { color: var(--subtle); }
 
-/* File upload field */
 .file-upload-zone {
-  border: 1.5px dashed var(--border2);
-  border-radius: var(--radius);
-  background: var(--bg);
-  padding: 16px 14px;
-  cursor: pointer;
+  border: 1.5px dashed var(--border2); border-radius: var(--radius);
+  background: var(--bg); padding: 16px 14px; cursor: pointer;
   transition: border-color var(--transition), background var(--transition);
   display: flex; align-items: center; gap: 10px;
 }
-.file-upload-zone:hover {
-  border-color: var(--accent);
-  background: var(--accent-bg);
-}
+.file-upload-zone:hover { border-color: var(--accent); background: var(--accent-bg); }
 .file-upload-zone input[type="file"] { display: none; }
 .file-upload-zone .upload-icon {
-  width: 32px; height: 32px;
-  border-radius: var(--radius);
+  width: 32px; height: 32px; border-radius: var(--radius);
   background: var(--grey-100);
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  font-size: 14px;
-  transition: background var(--transition);
+  flex-shrink: 0; font-size: 14px;
 }
-.file-upload-zone:hover .upload-icon { background: var(--accent-bg); }
 .file-upload-zone .upload-text { font-size: 12px; color: var(--muted); line-height: 1.4; }
 .file-upload-zone .upload-text strong { color: var(--accent); font-weight: 500; }
 .file-upload-zone .upload-text .ext { color: var(--subtle); font-size: 10.5px; margin-top: 1px; }
 
 .file-preview {
-  display: none;
-  align-items: center; gap: 10px;
-  background: var(--accent-bg);
-  border: 1px solid rgba(12,102,228,.2);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  margin-top: 6px;
+  display: none; align-items: center; gap: 10px;
+  background: var(--accent-bg); border: 1px solid rgba(12,102,228,.2);
+  border-radius: var(--radius); padding: 10px 14px; margin-top: 6px;
 }
 .file-preview.visible { display: flex; }
-.file-preview .file-name {
-  flex: 1; font-size: 12px; color: var(--accent);
-  font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.file-preview .file-remove {
-  background: none; border: none;
-  color: var(--muted); cursor: pointer; font-size: 14px; padding: 0 2px;
-  transition: color var(--transition);
-}
+.file-preview .file-name { flex: 1; font-size: 12px; color: var(--accent); font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-preview .file-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 0 2px; transition: color var(--transition); }
 .file-preview .file-remove:hover { color: var(--red); }
 
 .form-panel {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  margin-bottom: 28px;
-  box-shadow: var(--shadow-sm);
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 24px;
+  margin-bottom: 28px; box-shadow: var(--shadow-sm);
 }
-.form-panel-title {
-  font-size: 14px; font-weight: 700;
-  color: var(--text);
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border);
-  letter-spacing: -.01em;
-}
+.form-panel-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); letter-spacing: -.01em; }
 .form-actions { display: flex; gap: 10px; margin-top: 8px; }
 
 /* ═══════════════════════════════════════════════════════════
-   AREA OVERVIEW CARDS
+   AREA CARDS
 ═══════════════════════════════════════════════════════════ */
-.area-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 28px;
-}
+.area-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 28px; }
 .area-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px 18px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 18px;
   border-top: 3px solid transparent;
   transition: box-shadow var(--transition), transform var(--transition);
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
+  cursor: pointer; box-shadow: var(--shadow-sm);
 }
-.area-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
+.area-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .area-card .area-name { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
 .area-card .area-stat { display: flex; justify-content: space-between; margin-bottom: 4px; }
 .area-card .area-stat-label { font-size: 11px; color: var(--subtle); }
@@ -713,30 +497,13 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 /* ═══════════════════════════════════════════════════════════
    WEEKLY REVIEW
 ═══════════════════════════════════════════════════════════ */
-.weekly-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-.metric-mini {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px; text-align: center;
-  box-shadow: var(--shadow-sm);
-}
+.weekly-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+.metric-mini { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); }
 .metric-mini .val { font-family: var(--mono); font-size: 26px; font-weight: 500; }
 .metric-mini .lbl { font-size: 11px; color: var(--subtle); margin-top: 3px; }
 
-.area-week-block {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-bottom: 12px; overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-.area-week-header {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--border);
-  background: var(--grey-50);
-}
+.area-week-block { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden; box-shadow: var(--shadow-sm); }
+.area-week-header { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--grey-50); }
 .area-week-header .mini-badges { margin-left: auto; display: flex; gap: 6px; }
 .area-week-table { width: 100%; border-collapse: collapse; }
 .area-week-table td { padding: 9px 18px; font-size: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
@@ -744,13 +511,10 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 .area-week-table .task-col { max-width: 260px; }
 
 .note-area {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 10px 16px;
-  margin: 0 18px 16px;
-  font-size: 12px; color: var(--subtle); font-style: italic;
-  cursor: text; min-height: 36px; outline: none;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 16px;
+  margin: 0 18px 16px; font-size: 12px; color: var(--subtle);
+  font-style: italic; cursor: text; min-height: 36px; outline: none;
   transition: border-color var(--transition);
 }
 .note-area:focus { border-color: var(--accent); color: var(--text); font-style: normal; }
@@ -758,11 +522,7 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 /* ═══════════════════════════════════════════════════════════
    AREA PAGE HEADER
 ═══════════════════════════════════════════════════════════ */
-.area-page-header {
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 24px; padding-bottom: 18px;
-  border-bottom: 1px solid var(--border);
-}
+.area-page-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
 .area-page-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .area-page-name { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
 .area-page-code { font-family: var(--mono); font-size: 10px; color: var(--subtle); margin-top: 1px; }
@@ -772,10 +532,8 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 ═══════════════════════════════════════════════════════════ */
 .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
 .toast {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 18px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 18px;
   font-size: 13px; color: var(--text);
   display: flex; align-items: center; gap: 10px;
   box-shadow: var(--shadow-lg);
@@ -790,18 +548,14 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
    MODAL
 ═══════════════════════════════════════════════════════════ */
 .modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(9,30,66,.5);
-  z-index: 500;
-  display: none; align-items: center; justify-content: center;
+  position: fixed; inset: 0; background: rgba(9,30,66,.5);
+  z-index: 500; display: none; align-items: center; justify-content: center;
   backdrop-filter: blur(3px);
 }
 .modal-overlay.open { display: flex; }
 .modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 28px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 28px;
   width: 580px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
   box-shadow: var(--shadow-lg);
   animation: modalIn .22s cubic-bezier(.34,1.56,.64,1);
@@ -811,8 +565,7 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 .modal-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -.01em; }
 .modal-sub { font-family: var(--mono); font-size: 10px; color: var(--subtle); margin-top: 2px; }
 .modal-close {
-  margin-left: auto;
-  background: var(--grey-100); border: none;
+  margin-left: auto; background: var(--grey-100); border: none;
   color: var(--muted); font-size: 16px; cursor: pointer;
   width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -824,10 +577,8 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
    MISC
 ═══════════════════════════════════════════════════════════ */
 .id-chip {
-  font-family: var(--mono); font-size: 10px;
-  color: var(--subtle);
-  background: var(--grey-100);
-  border: 1px solid var(--border);
+  font-family: var(--mono); font-size: 10px; color: var(--subtle);
+  background: var(--grey-100); border: 1px solid var(--border);
   padding: 2px 8px; border-radius: 5px;
 }
 
@@ -837,33 +588,24 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 ::-webkit-scrollbar-thumb:hover { background: var(--grey-300); }
 
 /* ═══════════════════════════════════════════════════════════
-   RESPONSIVE — MOBILE
+   RESPONSIVE
 ═══════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .sidebar {
-    width: 64px; overflow: hidden;
-  }
-  .sidebar-logo .name,
-  .nav-label,
+  .sidebar { width: 64px; overflow: hidden; }
+  .sidebar-logo .name, .nav-label,
   .nav-item span:not(.dot):not(.badge),
-  .sidebar-footer .user,
-  .sidebar-footer .role { display: none; }
+  .sidebar-footer .user, .sidebar-footer .role { display: none; }
   .nav-item { justify-content: center; padding: 10px; }
   .nav-item .badge { display: none; }
-
-  .kpi-row { grid-template-columns: repeat(2, 1fr); }
-  .area-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-row { grid-template-columns: repeat(2,1fr); }
+  .area-grid { grid-template-columns: repeat(2,1fr); }
   .form-grid { grid-template-columns: 1fr; }
-  .form-grid.three { grid-template-columns: 1fr; }
   .weekly-grid { grid-template-columns: 1fr; }
   .topbar-title { display: none; }
   .content { padding: 16px; }
-
   .landing-stats { gap: 16px; }
 }
-
 @media (max-width: 480px) {
-  .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .area-grid { grid-template-columns: 1fr; }
 }
 
@@ -871,30 +613,45 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════
-     LOADING OVERLAY
-══════════════════════════════════════════════════════════ -->
+<!-- LOADING -->
 <div class="loading-overlay" id="loader">
   <div class="spinner"></div>
-  <div class="loading-label">INITIALIZING…</div>
+  <div class="loading-label" id="loaderLabel">CONECTANDO…</div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     LANDING PAGE
-══════════════════════════════════════════════════════════ -->
+<!-- DB STATUS INDICATOR -->
+<div class="db-status" id="dbStatus">
+  <div class="dot"></div>
+  <span id="dbStatusText">Connecting</span>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Edit Task</div>
+        <div class="modal-sub"  id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- LANDING -->
 <section id="landing">
   <div class="landing-inner">
 
-    <div class="landing-badge">
-      Operation Assistant
-    </div>
+    <div class="landing-badge">Operation Assistant</div>
 
-    <h1 class="landing-title">
-      OPERATIONS, <span>ORGANIZED.</span>
-    </h1>
+    <h1 class="landing-title">OPERATIONS, <span>ORGANIZED.</span></h1>
 
     <p class="landing-desc">
-      Manage tasks, track progress across areas, and generate weekly reviews — all in one lightweight, offline-ready dashboard.
+      Manage tasks, track progress across areas, and generate weekly reviews — all in one lightweight, cloud-synced dashboard.
     </p>
 
     <button class="landing-cta" onclick="enterApp()">
@@ -904,14 +661,14 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
       </svg>
     </button>
 
-    <div class="landing-stats" id="landingStats">
+    <div class="landing-stats">
       <div class="landing-stat">
         <div class="val" id="ls-total">—</div>
         <div class="lbl">Total Tasks</div>
       </div>
       <div class="landing-divider"></div>
       <div class="landing-stat">
-        <div class="val" id="ls-areas">5</div>
+        <div class="val">5</div>
         <div class="lbl">Work Areas</div>
       </div>
       <div class="landing-divider"></div>
@@ -921,37 +678,12 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
       </div>
     </div>
 
-    <p style="margin-top: 32px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; color: #97a0af; text-transform: uppercase;">
-      Developed by Santi Cocovi
-    </p>
+    <p class="landing-credit">Developed by Santiago Cocovi</p>
 
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════════════════
-     TOAST CONTAINER
-══════════════════════════════════════════════════════════ -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- ══════════════════════════════════════════════════════════
-     EDIT MODAL
-══════════════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal" id="modal">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title" id="modalTitle">Edit Task</div>
-        <div class="modal-sub" id="modalSub"></div>
-      </div>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div id="modalBody"></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     APP
-══════════════════════════════════════════════════════════ -->
+<!-- APP -->
 <div id="app">
 
   <!-- SIDEBAR -->
@@ -960,55 +692,44 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
       <div class="mark">OA · PS</div>
       <div class="name">Operation Assistant</div>
     </div>
-
-    <nav style="flex:1; padding-bottom:12px;">
+    <nav style="flex:1;padding-bottom:12px;">
       <div class="nav-section" style="margin-top:10px;">
         <div class="nav-label">Main</div>
-        <div class="nav-item active" onclick="navigate('dashboard', this)">
-          <span class="dot" style="background:var(--accent)"></span>
-          Dashboard
+        <div class="nav-item active" onclick="navigate('dashboard',this)">
+          <span class="dot" style="background:var(--accent)"></span>Dashboard
         </div>
-        <div class="nav-item" onclick="navigate('new-task', this)">
-          <span class="dot" style="background:var(--green)"></span>
-          New Task
+        <div class="nav-item" onclick="navigate('new-task',this)">
+          <span class="dot" style="background:var(--green)"></span>New Task
           <span class="badge">+</span>
         </div>
-        <div class="nav-item" onclick="navigate('weekly', this)">
-          <span class="dot" style="background:var(--orange)"></span>
-          Weekly Review
+        <div class="nav-item" onclick="navigate('weekly',this)">
+          <span class="dot" style="background:var(--orange)"></span>Weekly Review
         </div>
       </div>
-
       <div class="nav-section" style="margin-top:16px;">
         <div class="nav-label">Areas</div>
-        <div class="nav-item" onclick="navigate('area-ACC', this)" id="nav-ACC">
-          <span class="dot" style="background:var(--accent)"></span>
-          Account
+        <div class="nav-item" onclick="navigate('area-ACC',this)" id="nav-ACC">
+          <span class="dot" style="background:var(--accent)"></span>Account
           <span class="badge" id="badge-ACC">0</span>
         </div>
-        <div class="nav-item" onclick="navigate('area-OPC', this)" id="nav-OPC">
-          <span class="dot" style="background:var(--green)"></span>
-          Operations
+        <div class="nav-item" onclick="navigate('area-OPC',this)" id="nav-OPC">
+          <span class="dot" style="background:var(--green)"></span>Operations
           <span class="badge" id="badge-OPC">0</span>
         </div>
-        <div class="nav-item" onclick="navigate('area-FIN', this)" id="nav-FIN">
-          <span class="dot" style="background:var(--orange)"></span>
-          Finance
+        <div class="nav-item" onclick="navigate('area-FIN',this)" id="nav-FIN">
+          <span class="dot" style="background:var(--orange)"></span>Finance
           <span class="badge" id="badge-FIN">0</span>
         </div>
-        <div class="nav-item" onclick="navigate('area-OPP', this)" id="nav-OPP">
-          <span class="dot" style="background:var(--purple)"></span>
-          Projects
+        <div class="nav-item" onclick="navigate('area-OPP',this)" id="nav-OPP">
+          <span class="dot" style="background:var(--purple)"></span>Projects
           <span class="badge" id="badge-OPP">0</span>
         </div>
-        <div class="nav-item" onclick="navigate('area-HR', this)" id="nav-HR">
-          <span class="dot" style="background:var(--red)"></span>
-          HR
+        <div class="nav-item" onclick="navigate('area-HR',this)" id="nav-HR">
+          <span class="dot" style="background:var(--red)"></span>HR
           <span class="badge" id="badge-HR">0</span>
         </div>
       </div>
     </nav>
-
     <div class="sidebar-footer">
       <div class="user">Santiago Cocovi</div>
       <div class="role">Operations Admin</div>
@@ -1017,8 +738,6 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 
   <!-- MAIN -->
   <div class="main">
-
-    <!-- TOPBAR -->
     <header class="topbar">
       <div class="topbar-title">OPERATION ASSISTANT</div>
       <div class="topbar-breadcrumb">/ <span id="breadcrumb">Dashboard</span></div>
@@ -1029,29 +748,22 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
           </svg>
           Export CSV
         </button>
-        <button class="btn btn-primary" onclick="navigate('new-task', null); document.querySelectorAll('.nav-item')[1].classList.add('active')">
+        <button class="btn btn-primary" onclick="navigate('new-task',null);document.querySelectorAll('.nav-item')[1].classList.add('active')">
           + New Task
         </button>
       </div>
     </header>
 
-    <!-- CONTENT -->
     <div class="content">
 
-      <!-- ── DASHBOARD ── -->
+      <!-- DASHBOARD -->
       <div class="view active" id="view-dashboard">
         <div class="kpi-row" id="kpiRow"></div>
-        <div class="section-header">
-          <div class="section-title">Area Overview</div>
-          <div class="section-line"></div>
-        </div>
+        <div class="section-header"><div class="section-title">Area Overview</div><div class="section-line"></div></div>
         <div class="area-grid" id="areaGrid"></div>
-        <div class="section-header">
-          <div class="section-title">All Tasks</div>
-          <div class="section-line"></div>
-        </div>
+        <div class="section-header"><div class="section-title">All Tasks</div><div class="section-line"></div></div>
         <div class="filters">
-          <select class="filter-select" id="filterArea" onchange="renderDashboardTable()">
+          <select class="filter-select" id="filterArea"   onchange="renderDashboardTable()">
             <option value="">All Areas</option>
             <option value="ACC">Account</option>
             <option value="OPC">Operations</option>
@@ -1066,24 +778,17 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
             <option value="Completed">Completed</option>
             <option value="Blocked">Blocked</option>
           </select>
-          <select class="filter-select" id="filterOwner" onchange="renderDashboardTable()">
+          <select class="filter-select" id="filterOwner"  onchange="renderDashboardTable()">
             <option value="">All Owners</option>
           </select>
           <input type="text" class="search-input" id="searchInput" placeholder="Search tasks…" oninput="renderDashboardTable()"/>
         </div>
         <div class="table-wrap">
-          <table id="dashTable">
+          <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Area</th>
-                <th>Task</th>
-                <th>Owner</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Deadline</th>
-                <th>Urgency</th>
-                <th>Actions</th>
+                <th>ID</th><th>Area</th><th>Task</th><th>Owner</th>
+                <th>Priority</th><th>Status</th><th>Deadline</th><th>Urgency</th><th>Actions</th>
               </tr>
             </thead>
             <tbody id="dashTbody"></tbody>
@@ -1091,12 +796,10 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
         </div>
       </div>
 
-      <!-- ── NEW TASK ── -->
+      <!-- NEW TASK -->
       <div class="view" id="view-new-task">
         <div class="form-panel">
           <div class="form-panel-title">Create New Task</div>
-
-          <!-- Row 1: Area + Owner -->
           <div class="form-grid">
             <div class="form-field">
               <label>Area *</label>
@@ -1113,16 +816,12 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
               <input type="text" id="nt-owner" placeholder="Responsible person"/>
             </div>
           </div>
-
-          <!-- Row 2: Description -->
           <div class="form-grid full">
             <div class="form-field">
               <label>Task Description *</label>
               <input type="text" id="nt-desc" placeholder="What needs to be done?"/>
             </div>
           </div>
-
-          <!-- Row 3: Priority + Status + Start + Deadline -->
           <div class="form-grid">
             <div class="form-field">
               <label>Priority</label>
@@ -1151,21 +850,18 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
               <input type="date" id="nt-deadline"/>
             </div>
           </div>
-
-          <!-- Row 4: Comments -->
           <div class="form-grid full">
             <div class="form-field">
               <label>Comments / Notes</label>
               <textarea id="nt-comments" placeholder="Blockers, context, links…"></textarea>
             </div>
           </div>
-
-          <!-- Row 5: File attachment -->
           <div class="form-grid full">
             <div class="form-field">
               <label>Attach File (optional)</label>
               <div class="file-upload-zone" onclick="document.getElementById('nt-file').click()">
-                <input type="file" id="nt-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.xlsm" onchange="handleFileSelect(this,'nt-file-preview','nt-file-name')"/>
+                <input type="file" id="nt-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.xlsm"
+                       onchange="handleFileSelect(this,'nt-file-preview','nt-file-name')"/>
                 <div class="upload-icon">📎</div>
                 <div class="upload-text">
                   <strong>Click to attach a file</strong>
@@ -1174,25 +870,24 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
               </div>
               <div class="file-preview" id="nt-file-preview">
                 <span class="file-name" id="nt-file-name"></span>
-                <button class="file-remove" onclick="removeFile('nt-file','nt-file-preview','nt-file-name')" title="Remove file">×</button>
+                <button class="file-remove" onclick="removeFile('nt-file','nt-file-preview','nt-file-name')" title="Remove">×</button>
               </div>
             </div>
           </div>
-
           <div class="form-actions">
-            <button class="btn btn-primary" onclick="createTask()">Create Task</button>
-            <button class="btn btn-ghost" onclick="resetNewTaskForm()">Clear</button>
+            <button class="btn btn-primary" id="btnCreate" onclick="createTask()">Create Task</button>
+            <button class="btn btn-ghost"   onclick="resetNewTaskForm()">Clear</button>
           </div>
         </div>
       </div>
 
-      <!-- ── WEEKLY REVIEW ── -->
+      <!-- WEEKLY REVIEW -->
       <div class="view" id="view-weekly">
         <div class="weekly-grid" id="weeklyKPIs"></div>
         <div id="weeklyAreas"></div>
       </div>
 
-      <!-- ── AREA VIEWS (generated by JS) ── -->
+      <!-- AREA VIEWS -->
       <div class="view" id="view-area-ACC"></div>
       <div class="view" id="view-area-OPC"></div>
       <div class="view" id="view-area-FIN"></div>
@@ -1206,6 +901,125 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 
 <script>
 // ═══════════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════════════════════════════════
+
+const SUPABASE_URL  = 'https://gottltwrxkaykrgwotoc.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvdHRsdHdyeGtheWtyZ3dvdG9jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MzA5MjEsImV4cCI6MjA5MzUwNjkyMX0.P8Yif5MsFchfW-jzgeJxnhWHyGZcth0jIsX67K9DTvU';
+const API_BASE      = `${SUPABASE_URL}/rest/v1`;
+const HEADERS       = {
+  'Content-Type':  'application/json',
+  'apikey':        SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Prefer':        'return=representation'
+};
+
+// ═══════════════════════════════════════════════════════════
+// SUPABASE HELPERS
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * GET all tasks, ordered by creation date
+ */
+async function dbGetTasks() {
+  const res = await fetch(`${API_BASE}/tasks?order=created_at.asc`, {
+    headers: { ...HEADERS, 'Prefer': '' }
+  });
+  if (!res.ok) throw new Error(`GET tasks failed: ${res.status}`);
+  return res.json();
+}
+
+/**
+ * INSERT a new task row
+ */
+async function dbInsertTask(task) {
+  const res = await fetch(`${API_BASE}/tasks`, {
+    method: 'POST',
+    headers: HEADERS,
+    body: JSON.stringify(taskToRow(task))
+  });
+  if (!res.ok) throw new Error(`INSERT failed: ${res.status}`);
+  const rows = await res.json();
+  return rows[0];
+}
+
+/**
+ * UPDATE an existing task row by id
+ */
+async function dbUpdateTask(task) {
+  const res = await fetch(`${API_BASE}/tasks?id=eq.${encodeURIComponent(task.id)}`, {
+    method: 'PATCH',
+    headers: HEADERS,
+    body: JSON.stringify(taskToRow(task))
+  });
+  if (!res.ok) throw new Error(`UPDATE failed: ${res.status}`);
+  const rows = await res.json();
+  return rows[0];
+}
+
+/**
+ * DELETE a task row by id
+ */
+async function dbDeleteTask(id) {
+  const res = await fetch(`${API_BASE}/tasks?id=eq.${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    headers: { ...HEADERS, 'Prefer': '' }
+  });
+  if (!res.ok) throw new Error(`DELETE failed: ${res.status}`);
+}
+
+/**
+ * Convert in-memory task object → DB row shape
+ */
+function taskToRow(t) {
+  return {
+    id:          t.id,
+    area:        t.area,
+    description: t.desc,
+    owner:       t.owner,
+    priority:    t.priority,
+    status:      t.status,
+    start_date:  t.start   || null,
+    deadline:    t.deadline || null,
+    comments:    t.comments || null,
+    file_name:   t.file     || null,
+    file_data:   t.fileData || null,
+  };
+}
+
+/**
+ * Convert DB row → in-memory task object
+ */
+function rowToTask(r) {
+  return {
+    id:       r.id,
+    area:     r.area,
+    desc:     r.description,
+    owner:    r.owner,
+    priority: r.priority,
+    status:   r.status,
+    start:    r.start_date || '',
+    deadline: r.deadline   || '',
+    comments: r.comments   || '',
+    file:     r.file_name  || null,
+    fileData: r.file_data  || null,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// DB STATUS UI
+// ═══════════════════════════════════════════════════════════
+
+function setDbStatus(state, text) {
+  const el = document.getElementById('dbStatus');
+  el.className = `db-status visible ${state}`;
+  document.getElementById('dbStatusText').textContent = text;
+  if (state === 'ok') {
+    setTimeout(() => { el.classList.remove('visible'); }, 3000);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
 
@@ -1217,40 +1031,26 @@ const AREAS = {
   HR:  { name:"HR",         color:"var(--red)",    hex:"#ae2a19", badge:"badge-area-hr"  },
 };
 
-// Tasks — each may have an optional `file` property (name) and `fileData` (base64 url)
-let tasks = [
-  { id:"ACC-001", area:"ACC", desc:"Riverside HOA proposal follow-up",       owner:"Troy",   priority:"High",     status:"In Progress", start:"2025-05-01", deadline:"2025-05-09", comments:"Two competing bids. Call, not email." },
-  { id:"ACC-002", area:"ACC", desc:"Onboard new enterprise client – Greenfield", owner:"Dani",   priority:"Medium",   status:"Pending",     start:"2025-05-05", deadline:"2025-05-16", comments:"Awaiting signed contract." },
-  { id:"ACC-003", area:"ACC", desc:"Renewal call with client Porter & Co",    owner:"Troy",   priority:"High",     status:"Pending",     start:"2025-05-06", deadline:"2025-05-13", comments:"Q2 renewal. Prepare deck." },
-  { id:"ACC-004", area:"ACC", desc:"Update CRM with Q1 interaction logs",     owner:"Dani",   priority:"Low",      status:"Completed",   start:"2025-04-28", deadline:"2025-05-02", comments:"Done." },
-  { id:"ACC-005", area:"ACC", desc:"Prepare account health scorecard",        owner:"Troy",   priority:"Medium",   status:"In Progress", start:"2025-05-05", deadline:"2025-05-15", comments:"Template ready." },
-  { id:"OPC-001", area:"OPC", desc:"Distribute crew schedule to field leads", owner:"Dani",   priority:"High",     status:"In Progress", start:"2025-05-01", deadline:"2025-05-07", comments:"Operational dependency." },
-  { id:"OPC-002", area:"OPC", desc:"Complete equipment maintenance log v1",   owner:"Dani",   priority:"Critical", status:"Blocked",     start:"2025-04-14", deadline:"2025-05-05", comments:"4 weeks overdue. No blockers reported." },
-  { id:"OPC-003", area:"OPC", desc:"Review and update SOPs – field operations",owner:"Marcus",priority:"Medium",   status:"Pending",     start:"2025-05-05", deadline:"2025-05-20", comments:"Quarterly SOP review." },
-  { id:"OPC-004", area:"OPC", desc:"Vendor coordination – supply restock",    owner:"Carlos", priority:"Low",      status:"Completed",   start:"2025-04-30", deadline:"2025-05-03", comments:"Delivered." },
-  { id:"OPC-005", area:"OPC", desc:"Audit route efficiency – north side",     owner:"Dani",   priority:"Medium",   status:"Pending",     start:"2025-05-07", deadline:"2025-05-19", comments:"Needs field data export." },
-  { id:"FIN-001", area:"FIN", desc:"Draft Q3 pricing deck for Marcus",        owner:"Troy",   priority:"Medium",   status:"In Progress", start:"2025-05-01", deadline:"2025-05-09", comments:"Marcus forwards to accountant month-end." },
-  { id:"FIN-002", area:"FIN", desc:"Reconcile May invoices",                  owner:"Dani",   priority:"High",     status:"Pending",     start:"2025-05-05", deadline:"2025-05-12", comments:"AP aging report attached." },
-  { id:"FIN-003", area:"FIN", desc:"Prepare payroll summary – field staff",   owner:"Marcus", priority:"High",     status:"Pending",     start:"2025-05-06", deadline:"2025-05-10", comments:"Bi-weekly cycle." },
-  { id:"FIN-004", area:"FIN", desc:"Q2 budget vs actual variance report",     owner:"Troy",   priority:"Medium",   status:"In Progress", start:"2025-05-03", deadline:"2025-05-17", comments:"Finance review required." },
-  { id:"FIN-005", area:"FIN", desc:"Expense report – April field ops",        owner:"Carlos", priority:"Low",      status:"Completed",   start:"2025-04-29", deadline:"2025-05-01", comments:"Approved." },
-  { id:"OPP-001", area:"OPP", desc:"Draft field lead JD – north side routes", owner:"Troy",   priority:"Medium",   status:"Pending",     start:"2025-05-05", deadline:"2025-05-15", comments:"Marcus reviews before Monday meeting." },
-  { id:"OPP-002", area:"OPP", desc:"Launch internal ops tracking project",    owner:"Dani",   priority:"High",     status:"In Progress", start:"2025-05-01", deadline:"2025-05-31", comments:"This system is the MVP." },
-  { id:"OPP-003", area:"OPP", desc:"Design scalable onboarding framework",    owner:"Marcus", priority:"Medium",   status:"Pending",     start:"2025-05-08", deadline:"2025-05-30", comments:"HR + Ops collaboration needed." },
-  { id:"OPP-004", area:"OPP", desc:"Implement new scheduling tool",           owner:"Carlos", priority:"Low",      status:"Pending",     start:"2025-05-10", deadline:"2025-06-05", comments:"Evaluate 2 vendors first." },
-  { id:"OPP-005", area:"OPP", desc:"Process documentation – invoicing flow",  owner:"Dani",   priority:"High",     status:"Pending",     start:"2025-05-06", deadline:"2025-05-22", comments:"First draft by EOW." },
-  { id:"HR-001",  area:"HR",  desc:"Post field lead job description",          owner:"Marcus", priority:"High",     status:"Pending",     start:"2025-05-10", deadline:"2025-05-17", comments:"After Troy finalises draft." },
-  { id:"HR-002",  area:"HR",  desc:"Schedule performance reviews – Q2",       owner:"Dani",   priority:"Medium",   status:"Pending",     start:"2025-05-08", deadline:"2025-05-24", comments:"All field leads included." },
-  { id:"HR-003",  area:"HR",  desc:"Update employee handbook section 4",      owner:"Marcus", priority:"Low",      status:"Completed",   start:"2025-04-28", deadline:"2025-05-01", comments:"PTO policy updated." },
-  { id:"HR-004",  area:"HR",  desc:"Offboarding checklist – departing staff", owner:"Dani",   priority:"Medium",   status:"In Progress", start:"2025-05-05", deadline:"2025-05-14", comments:"IT access revocation pending." },
-  { id:"HR-005",  area:"HR",  desc:"Training plan – new crew members",        owner:"Carlos", priority:"High",     status:"Pending",     start:"2025-05-07", deadline:"2025-05-21", comments:"Safety + ops modules." },
-];
+let tasks = [];
 
-const TODAY = new Date().toISOString().slice(0,10); // dynamic today
-let idCounters = { ACC:5, OPC:5, FIN:5, OPP:5, HR:5 };
+const TODAY = new Date().toISOString().slice(0, 10);
+
+// Counters per area — derived from loaded tasks to avoid ID collisions
+let idCounters = { ACC:0, OPC:0, FIN:0, OPP:0, HR:0 };
+
+function rebuildCounters() {
+  idCounters = { ACC:0, OPC:0, FIN:0, OPP:0, HR:0 };
+  tasks.forEach(t => {
+    const parts = t.id.split('-');
+    if (parts.length === 2 && idCounters[parts[0]] !== undefined) {
+      const n = parseInt(parts[1], 10);
+      if (n > idCounters[parts[0]]) idCounters[parts[0]] = n;
+    }
+  });
+}
 
 // ═══════════════════════════════════════════════════════════
-// LANDING → APP TRANSITION
+// LANDING → APP
 // ═══════════════════════════════════════════════════════════
 
 function enterApp() {
@@ -1269,12 +1069,12 @@ function enterApp() {
 // ═══════════════════════════════════════════════════════════
 
 function urgency(deadline, status) {
-  if (status === "Completed") return { label: "✓ Done",      cls: "urgency-ok"      };
-  if (!deadline)              return { label: "—",           cls: ""                };
-  if (deadline < TODAY)       return { label: "🔴 Overdue",  cls: "urgency-overdue" };
+  if (status === "Completed") return { label:"✓ Done",      cls:"urgency-ok"      };
+  if (!deadline)              return { label:"—",           cls:""                };
+  if (deadline < TODAY)       return { label:"🔴 Overdue",  cls:"urgency-overdue" };
   const diff = (new Date(deadline) - new Date(TODAY)) / 86400000;
-  if (diff <= 3)              return { label: "🟠 Due Soon", cls: "urgency-soon"    };
-  return                             { label: "🟢 On Track", cls: "urgency-ok"      };
+  if (diff <= 3)              return { label:"🟠 Due Soon", cls:"urgency-soon"    };
+  return                             { label:"🟢 On Track", cls:"urgency-ok"      };
 }
 
 function statusBadge(s) {
@@ -1288,11 +1088,7 @@ function priorityBadge(p) {
 function areaBadge(code) {
   return `<span class="badge ${AREAS[code].badge}">${AREAS[code].name}</span>`;
 }
-
-function getOwners() {
-  return [...new Set(tasks.map(t => t.owner))].sort();
-}
-
+function getOwners() { return [...new Set(tasks.map(t => t.owner))].sort(); }
 function fileIcon(name) {
   if (!name) return '📎';
   const ext = name.split('.').pop().toLowerCase();
@@ -1301,6 +1097,8 @@ function fileIcon(name) {
   if (['xls','xlsx','xlsm'].includes(ext)) return '📊';
   return '📎';
 }
+function escHtml(str)  { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(str)  { return String(str||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION
@@ -1312,17 +1110,14 @@ function navigate(viewId, navEl) {
   const view = document.getElementById('view-' + viewId);
   if (view) view.classList.add('active');
   if (navEl) navEl.classList.add('active');
-
   const labels = {
     'dashboard':'Dashboard','new-task':'New Task','weekly':'Weekly Review',
-    'area-ACC':'Account','area-OPC':'Operations','area-FIN':'Finance',
-    'area-OPP':'Projects','area-HR':'HR'
+    'area-ACC':'Account','area-OPC':'Operations','area-FIN':'Finance','area-OPP':'Projects','area-HR':'HR'
   };
   document.getElementById('breadcrumb').textContent = labels[viewId] || viewId;
-
-  if (viewId === 'dashboard')          renderDashboard();
-  if (viewId === 'weekly')             renderWeekly();
-  if (viewId.startsWith('area-'))      renderArea(viewId.replace('area-',''));
+  if (viewId === 'dashboard')       renderDashboard();
+  if (viewId === 'weekly')          renderWeekly();
+  if (viewId.startsWith('area-'))   renderArea(viewId.replace('area-',''));
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1343,7 +1138,6 @@ function renderKPIs() {
   const blocked    = tasks.filter(t => t.status==="Blocked").length;
   const pending    = tasks.filter(t => t.status==="Pending").length;
   const pct = total ? Math.round(completed/total*100) : 0;
-
   document.getElementById('kpiRow').innerHTML = `
     <div class="kpi-card" style="border-top:3px solid var(--accent)">
       <div class="kpi-label">Total Tasks</div>
@@ -1380,16 +1174,13 @@ function renderAreaCards() {
     const blocked = areaT.filter(t => t.status === "Blocked").length;
     const pct     = areaT.length ? Math.round(done/areaT.length*100) : 0;
     return `
-      <div class="area-card" style="border-top-color:${a.hex}" onclick="navigate('area-${code}', document.getElementById('nav-${code}'))">
+      <div class="area-card" style="border-top-color:${a.hex}" onclick="navigate('area-${code}',document.getElementById('nav-${code}'))">
         <div class="area-name">${a.name}</div>
         <div class="area-stat"><span class="area-stat-label">Tasks</span><span class="area-stat-val" style="color:${a.hex}">${areaT.length}</span></div>
         <div class="area-stat"><span class="area-stat-label">Done</span><span class="area-stat-val" style="color:var(--green)">${done}</span></div>
         <div class="area-stat"><span class="area-stat-label">Blocked</span><span class="area-stat-val" style="color:var(--red)">${blocked}</span></div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" style="width:${pct}%;background:${a.hex}"></div>
-        </div>
-      </div>
-    `;
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;background:${a.hex}"></div></div>
+      </div>`;
   }).join('');
   document.getElementById('areaGrid').innerHTML = html;
 }
@@ -1406,42 +1197,31 @@ function renderDashboardTable() {
   const status = document.getElementById('filterStatus').value;
   const owner  = document.getElementById('filterOwner').value;
   const search = document.getElementById('searchInput').value.toLowerCase();
-
   const filtered = tasks.filter(t =>
     (!area   || t.area === area) &&
     (!status || t.status === status) &&
     (!owner  || t.owner === owner) &&
     (!search || t.desc.toLowerCase().includes(search) || t.owner.toLowerCase().includes(search))
   );
-
   const rows = filtered.map(t => {
     const urg = urgency(t.deadline, t.status);
     const fileTag = t.file
-      ? `<div class="file-tag" onclick="downloadFile('${t.id}')">${fileIcon(t.file)} ${t.file}</div>`
+      ? `<div class="file-tag" onclick="downloadFile('${t.id}')">${fileIcon(t.file)} ${escHtml(t.file)}</div>`
       : '';
     return `<tr>
       <td><span class="id-chip">${t.id}</span></td>
       <td>${areaBadge(t.area)}</td>
-      <td>
-        <div class="task-desc">
-          <div class="title">${escHtml(t.desc)}</div>
-          <div class="sub">${escHtml(t.comments||'')}</div>
-          ${fileTag}
-        </div>
-      </td>
+      <td><div class="task-desc"><div class="title">${escHtml(t.desc)}</div><div class="sub">${escHtml(t.comments||'')}</div>${fileTag}</div></td>
       <td style="font-weight:500">${escHtml(t.owner)}</td>
       <td>${priorityBadge(t.priority)}</td>
       <td>${statusBadge(t.status)}</td>
       <td style="font-family:var(--mono);font-size:11px;color:var(--subtle)">${t.deadline||'—'}</td>
       <td class="${urg.cls}">${urg.label}</td>
-      <td>
-        <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="openEditModal('${t.id}')">Edit</button>
-      </td>
+      <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="openEditModal('${t.id}')">Edit</button></td>
     </tr>`;
   }).join('');
-
   document.getElementById('dashTbody').innerHTML = rows ||
-    `<tr><td colspan="9" style="text-align:center;color:var(--subtle);padding:40px;font-size:13px">No tasks match the current filters.</td></tr>`;
+    `<tr><td colspan="9" style="text-align:center;color:var(--subtle);padding:40px">No tasks match the current filters.</td></tr>`;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1452,7 +1232,6 @@ function renderArea(code) {
   const a     = AREAS[code];
   const areaT = tasks.filter(t => t.area === code);
   document.getElementById(`badge-${code}`).textContent = areaT.length;
-
   const rows = areaT.map(t => {
     const urg = urgency(t.deadline, t.status);
     const fileTag = t.file
@@ -1460,13 +1239,7 @@ function renderArea(code) {
       : '';
     return `<tr>
       <td><span class="id-chip">${t.id}</span></td>
-      <td>
-        <div class="task-desc">
-          <div class="title">${escHtml(t.desc)}</div>
-          <div class="sub">${escHtml(t.comments||'')}</div>
-          ${fileTag}
-        </div>
-      </td>
+      <td><div class="task-desc"><div class="title">${escHtml(t.desc)}</div><div class="sub">${escHtml(t.comments||'')}</div>${fileTag}</div></td>
       <td style="font-weight:500">${escHtml(t.owner)}</td>
       <td>${priorityBadge(t.priority)}</td>
       <td>${statusBadge(t.status)}</td>
@@ -1475,36 +1248,32 @@ function renderArea(code) {
       <td class="${urg.cls}">${urg.label}</td>
       <td>
         <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="openEditModal('${t.id}')">Edit</button>
+          <button class="btn btn-ghost"  style="padding:4px 10px;font-size:11px" onclick="openEditModal('${t.id}')">Edit</button>
           <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteTask('${t.id}')">✕</button>
         </div>
       </td>
     </tr>`;
   }).join('');
-
   document.getElementById(`view-area-${code}`).innerHTML = `
     <div class="area-page-header">
       <div class="area-page-dot" style="background:${a.hex}"></div>
       <div>
         <div class="area-page-name">${a.name}</div>
-        <div class="area-page-code">${code} · ${areaT.length} task${areaT.length !== 1 ? 's' : ''}</div>
+        <div class="area-page-code">${code} · ${areaT.length} task${areaT.length!==1?'s':''}</div>
       </div>
-      <div style="margin-left:auto;display:flex;gap:8px">
+      <div style="margin-left:auto">
         <button class="btn btn-primary" onclick="navigate('new-task',null);document.getElementById('nt-area').value='${code}'">+ Add Task</button>
       </div>
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>ID</th><th>Task</th><th>Owner</th><th>Priority</th>
-            <th>Status</th><th>Start</th><th>Deadline</th><th>Urgency</th><th>Actions</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th>ID</th><th>Task</th><th>Owner</th><th>Priority</th>
+          <th>Status</th><th>Start</th><th>Deadline</th><th>Urgency</th><th>Actions</th>
+        </tr></thead>
         <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:var(--subtle);padding:40px">No tasks yet.</td></tr>'}</tbody>
       </table>
-    </div>
-  `;
+    </div>`;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1512,7 +1281,6 @@ function renderArea(code) {
 // ═══════════════════════════════════════════════════════════
 
 function renderWeekly() {
-  const total     = tasks.length;
   const completed = tasks.filter(t => t.status==="Completed").length;
   const delayed   = tasks.filter(t => t.deadline < TODAY && t.status !== "Completed").length;
   const carryover = tasks.filter(t => ["Pending","Blocked"].includes(t.status)).length;
@@ -1528,7 +1296,6 @@ function renderWeekly() {
     const done     = areaT.filter(t => t.status==="Completed");
     const delayed2 = areaT.filter(t => t.deadline < TODAY && t.status !== "Completed");
     const carry    = areaT.filter(t => ["Pending","Blocked"].includes(t.status));
-
     const rows = areaT.map(t => {
       const isDone    = t.status === "Completed";
       const isDelayed = t.deadline < TODAY && !isDone;
@@ -1538,12 +1305,11 @@ function renderWeekly() {
         <td style="font-weight:500;font-size:11px">${escHtml(t.owner)}</td>
         <td>${statusBadge(t.status)}</td>
         <td style="font-family:var(--mono);font-size:10px;color:var(--subtle)">${t.deadline||'—'}</td>
-        <td style="font-size:12px;text-align:center">${isDone    ? '✅' : ''}</td>
-        <td style="font-size:12px;text-align:center">${isDelayed ? '⚠️' : ''}</td>
-        <td style="font-size:12px;text-align:center">${isCarry   ? '🔁' : ''}</td>
+        <td style="text-align:center">${isDone    ? '✅' : ''}</td>
+        <td style="text-align:center">${isDelayed ? '⚠️' : ''}</td>
+        <td style="text-align:center">${isCarry   ? '🔁' : ''}</td>
       </tr>`;
     }).join('');
-
     return `
       <div class="area-week-block">
         <div class="area-week-header">
@@ -1555,30 +1321,25 @@ function renderWeekly() {
           </div>
         </div>
         <table class="area-week-table">
-          <thead>
-            <tr>
-              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Task</th>
-              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Owner</th>
-              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Status</th>
-              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Deadline</th>
-              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Done</th>
-              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Delay</th>
-              <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Carry</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Task</th>
+            <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Owner</th>
+            <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Status</th>
+            <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Deadline</th>
+            <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Done</th>
+            <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Delay</th>
+            <th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Carry</th>
+          </tr></thead>
           <tbody>${rows}</tbody>
         </table>
         <div contenteditable="true" class="note-area" data-ph="+ Add strategic notes for ${a.name}…"></div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 
   document.getElementById('weeklyAreas').innerHTML = `
     <div class="section-header"><div class="section-title">Area Breakdown</div><div class="section-line"></div></div>
-    ${areaBlocks}
-  `;
+    ${areaBlocks}`;
 
-  // Placeholder behavior for contenteditable notes
   document.querySelectorAll('.note-area').forEach(el => {
     const ph = el.getAttribute('data-ph');
     if (!el.textContent.trim()) { el.textContent = ph; el.style.color = 'var(--subtle)'; }
@@ -1595,21 +1356,11 @@ function renderWeekly() {
 // FILE HANDLING
 // ═══════════════════════════════════════════════════════════
 
-/**
- * Reads a file input and updates preview UI.
- * fileData is stored as base64 DataURL so the attachment survives in-memory.
- */
 function handleFileSelect(input, previewId, nameId) {
   const file = input.files[0];
   if (!file) return;
-
-  const preview  = document.getElementById(previewId);
-  const nameSpan = document.getElementById(nameId);
-
-  nameSpan.textContent = file.name;
-  preview.classList.add('visible');
-
-  // Store base64 on the input element for retrieval at createTask/saveEdit time
+  document.getElementById(nameId).textContent = file.name;
+  document.getElementById(previewId).classList.add('visible');
   const reader = new FileReader();
   reader.onload = e => { input._fileData = e.target.result; input._fileName = file.name; };
   reader.readAsDataURL(file);
@@ -1617,28 +1368,23 @@ function handleFileSelect(input, previewId, nameId) {
 
 function removeFile(inputId, previewId, nameId) {
   const input = document.getElementById(inputId);
-  input.value = '';
-  input._fileData = null;
-  input._fileName = null;
+  input.value = ''; input._fileData = null; input._fileName = null;
   document.getElementById(previewId).classList.remove('visible');
   document.getElementById(nameId).textContent = '';
 }
 
-/** Trigger browser download of stored file data. */
 function downloadFile(taskId) {
   const t = tasks.find(x => x.id === taskId);
-  if (!t || !t.fileData) { toast("No file data available for download.", "error"); return; }
+  if (!t || !t.fileData) { toast("No file available for download.", "error"); return; }
   const a = document.createElement('a');
-  a.href = t.fileData;
-  a.download = t.file;
-  a.click();
+  a.href = t.fileData; a.download = t.file; a.click();
 }
 
 // ═══════════════════════════════════════════════════════════
-// CREATE TASK
+// CREATE TASK — writes to Supabase
 // ═══════════════════════════════════════════════════════════
 
-function createTask() {
+async function createTask() {
   const area     = document.getElementById('nt-area').value;
   const owner    = document.getElementById('nt-owner').value.trim();
   const desc     = document.getElementById('nt-desc').value.trim();
@@ -1657,19 +1403,29 @@ function createTask() {
   idCounters[area]++;
   const id = `${area}-${String(idCounters[area]).padStart(3,'0')}`;
 
-  const task = { id, area, desc, owner, priority, status, start, deadline, comments };
+  const task = { id, area, desc, owner, priority, status, start, deadline, comments, file: null, fileData: null };
+  if (fileInput._fileName) { task.file = fileInput._fileName; task.fileData = fileInput._fileData; }
 
-  // Attach file data if present
-  if (fileInput._fileName) {
-    task.file     = fileInput._fileName;
-    task.fileData = fileInput._fileData;
+  const btn = document.getElementById('btnCreate');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  setDbStatus('sync', 'Saving…');
+
+  try {
+    await dbInsertTask(task);
+    tasks.push(task);
+    updateNavBadges();
+    toast(`Task ${id} created.`, "success");
+    setDbStatus('ok', 'Saved');
+    resetNewTaskForm();
+    navigate('area-' + area, document.getElementById('nav-' + area));
+  } catch (e) {
+    idCounters[area]--; // roll back counter on failure
+    toast("Error saving task. Check your connection.", "error");
+    setDbStatus('err', 'Error');
+    console.error(e);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Task';
   }
-
-  tasks.push(task);
-  updateNavBadges();
-  toast(`Task ${id} created successfully.`, "success");
-  resetNewTaskForm();
-  navigate('area-' + area, document.getElementById('nav-' + area));
 }
 
 function resetNewTaskForm() {
@@ -1682,25 +1438,18 @@ function resetNewTaskForm() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// EDIT MODAL
+// EDIT MODAL — saves to Supabase
 // ═══════════════════════════════════════════════════════════
 
 function openEditModal(id) {
   const t = tasks.find(x => x.id === id);
   if (!t) return;
-
   document.getElementById('modalTitle').textContent = 'Edit Task';
   document.getElementById('modalSub').textContent   = id;
 
   const filePreviewHtml = t.file
-    ? `<div class="file-preview visible" id="ed-file-preview">
-         <span class="file-name" id="ed-file-name">${escHtml(t.file)}</span>
-         <button class="file-remove" onclick="removeModalFile('${id}')" title="Remove file">×</button>
-       </div>`
-    : `<div class="file-preview" id="ed-file-preview">
-         <span class="file-name" id="ed-file-name"></span>
-         <button class="file-remove" onclick="removeModalFile('${id}')" title="Remove file">×</button>
-       </div>`;
+    ? `<div class="file-preview visible" id="ed-file-preview"><span class="file-name" id="ed-file-name">${escHtml(t.file)}</span><button class="file-remove" onclick="removeModalFile('${id}')" title="Remove">×</button></div>`
+    : `<div class="file-preview" id="ed-file-preview"><span class="file-name" id="ed-file-name"></span><button class="file-remove" onclick="removeModalFile('${id}')" title="Remove">×</button></div>`;
 
   document.getElementById('modalBody').innerHTML = `
     <div class="form-grid full"><div class="form-field">
@@ -1710,19 +1459,13 @@ function openEditModal(id) {
     <div class="form-grid">
       <div class="form-field"><label>Owner</label><input type="text" id="ed-owner" value="${escAttr(t.owner)}"/></div>
       <div class="form-field"><label>Area</label>
-        <select id="ed-area">
-          ${Object.entries(AREAS).map(([c,a]) => `<option value="${c}" ${t.area===c?'selected':''}>${a.name}</option>`).join('')}
-        </select>
+        <select id="ed-area">${Object.entries(AREAS).map(([c,a])=>`<option value="${c}" ${t.area===c?'selected':''}>${a.name}</option>`).join('')}</select>
       </div>
       <div class="form-field"><label>Priority</label>
-        <select id="ed-priority">
-          ${['Critical','High','Medium','Low'].map(p => `<option value="${p}" ${t.priority===p?'selected':''}>${p}</option>`).join('')}
-        </select>
+        <select id="ed-priority">${['Critical','High','Medium','Low'].map(p=>`<option value="${p}" ${t.priority===p?'selected':''}>${p}</option>`).join('')}</select>
       </div>
       <div class="form-field"><label>Status</label>
-        <select id="ed-status">
-          ${['Pending','In Progress','Completed','Blocked'].map(s => `<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}
-        </select>
+        <select id="ed-status">${['Pending','In Progress','Completed','Blocked'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}</select>
       </div>
       <div class="form-field"><label>Start Date</label><input type="date" id="ed-start" value="${t.start}"/></div>
       <div class="form-field"><label>Deadline</label><input type="date" id="ed-deadline" value="${t.deadline}"/></div>
@@ -1737,22 +1480,18 @@ function openEditModal(id) {
         <input type="file" id="ed-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.xlsm"
                onchange="handleFileSelect(this,'ed-file-preview','ed-file-name')"/>
         <div class="upload-icon">📎</div>
-        <div class="upload-text">
-          <strong>Click to attach or replace</strong>
-          <div class="ext">.pdf · .doc · .docx · .xls · .xlsx · .xlsm</div>
-        </div>
+        <div class="upload-text"><strong>Click to attach or replace</strong><div class="ext">.pdf · .doc · .docx · .xls · .xlsx · .xlsm</div></div>
       </div>
       ${filePreviewHtml}
     </div></div>
     <div class="form-actions">
-      <button class="btn btn-primary" onclick="saveEdit('${id}')">Save Changes</button>
+      <button class="btn btn-primary" id="btnSaveEdit" onclick="saveEdit('${id}')">Save Changes</button>
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-    </div>
-  `;
+    </div>`;
+
   document.getElementById('modalOverlay').classList.add('open');
 }
 
-/** Remove file from task inside modal (before saving) */
 function removeModalFile(taskId) {
   const t = tasks.find(x => x.id === taskId);
   if (t) { t.file = null; t.fileData = null; }
@@ -1762,7 +1501,7 @@ function removeModalFile(taskId) {
   if (edFile) { edFile.value=''; edFile._fileData=null; edFile._fileName=null; }
 }
 
-function saveEdit(id) {
+async function saveEdit(id) {
   const t = tasks.find(x => x.id === id);
   if (!t) return;
 
@@ -1775,25 +1514,43 @@ function saveEdit(id) {
   t.deadline = document.getElementById('ed-deadline').value;
   t.comments = document.getElementById('ed-comments').value.trim();
 
-  // Update file if a new one was selected
   const edFile = document.getElementById('ed-file');
-  if (edFile && edFile._fileName) {
-    t.file     = edFile._fileName;
-    t.fileData = edFile._fileData;
-  }
+  if (edFile && edFile._fileName) { t.file = edFile._fileName; t.fileData = edFile._fileData; }
 
-  closeModal();
-  updateNavBadges();
-  toast(`Task ${id} updated.`, "success");
-  renderDashboard();
+  const btn = document.getElementById('btnSaveEdit');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  setDbStatus('sync', 'Saving…');
+
+  try {
+    await dbUpdateTask(t);
+    toast(`Task ${id} updated.`, "success");
+    setDbStatus('ok', 'Saved');
+    closeModal();
+    updateNavBadges();
+    renderDashboard();
+  } catch (e) {
+    toast("Error updating task. Check your connection.", "error");
+    setDbStatus('err', 'Error');
+    console.error(e);
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  }
 }
 
-function deleteTask(id) {
-  if (!confirm(`Delete task ${id}? This action cannot be undone.`)) return;
-  tasks = tasks.filter(t => t.id !== id);
-  updateNavBadges();
-  toast(`Task ${id} deleted.`, "success");
-  renderDashboard();
+async function deleteTask(id) {
+  if (!confirm(`Delete task ${id}? This cannot be undone.`)) return;
+  setDbStatus('sync', 'Deleting…');
+  try {
+    await dbDeleteTask(id);
+    tasks = tasks.filter(t => t.id !== id);
+    updateNavBadges();
+    toast(`Task ${id} deleted.`, "success");
+    setDbStatus('ok', 'Deleted');
+    renderDashboard();
+  } catch (e) {
+    toast("Error deleting task. Check your connection.", "error");
+    setDbStatus('err', 'Error');
+    console.error(e);
+  }
 }
 
 function closeModal() {
@@ -1810,7 +1567,7 @@ document.getElementById('modalOverlay').addEventListener('click', e => {
 function toast(msg, type="success") {
   const t = document.createElement('div');
   t.className = `toast ${type}`;
-  t.innerHTML = `<span>${type === "success" ? "✓" : "✕"}</span> ${msg}`;
+  t.innerHTML = `<span>${type==="success"?"✓":"✕"}</span> ${msg}`;
   document.getElementById('toastContainer').appendChild(t);
   setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(16px)'; t.style.transition='.3s ease'; }, 2800);
   setTimeout(() => t.remove(), 3200);
@@ -1822,7 +1579,7 @@ function toast(msg, type="success") {
 
 function updateNavBadges() {
   Object.keys(AREAS).forEach(code => {
-    document.getElementById(`badge-${code}`).textContent = tasks.filter(t => t.area === code).length;
+    document.getElementById(`badge-${code}`).textContent = tasks.filter(t => t.area===code).length;
   });
 }
 
@@ -1832,47 +1589,57 @@ function updateNavBadges() {
 
 function exportData() {
   const headers = ["ID","Area","Task","Owner","Priority","Status","Start","Deadline","Comments","File"];
-  const rows = tasks.map(t => [t.id, AREAS[t.area].name, t.desc, t.owner, t.priority, t.status, t.start, t.deadline, t.comments, t.file||'']);
-  const csv = [headers, ...rows].map(r => r.map(v => `"${(v||'').replace(/"/g,'""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv], { type:"text/csv" });
+  const rows = tasks.map(t => [t.id,AREAS[t.area].name,t.desc,t.owner,t.priority,t.status,t.start,t.deadline,t.comments,t.file||'']);
+  const csv  = [headers,...rows].map(r => r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv],{type:"text/csv"});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = "OperationAssistant_Export.csv"; a.click();
+  a.href=url; a.download="OperationAssistant_Export.csv"; a.click();
   URL.revokeObjectURL(url);
   toast("Export complete.", "success");
 }
 
 // ═══════════════════════════════════════════════════════════
-// SECURITY HELPERS (prevent XSS in dynamic HTML)
+// INIT — load tasks from Supabase on page load
 // ═══════════════════════════════════════════════════════════
 
-function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function escAttr(str) {
-  return String(str||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
+window.addEventListener('load', async () => {
+  const loaderLabel = document.getElementById('loaderLabel');
+  setDbStatus('sync', 'Connecting…');
 
-// ═══════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════
+  try {
+    loaderLabel.textContent = 'LOADING DATA…';
+    const rows = await dbGetTasks();
+    tasks = rows.map(rowToTask);
+    rebuildCounters();
 
-window.addEventListener('load', () => {
-  // Populate landing stats
-  document.getElementById('ls-total').textContent = tasks.length;
-  document.getElementById('ls-done').textContent  = tasks.filter(t=>t.status==="Completed").length;
+    // Update landing stats
+    document.getElementById('ls-total').textContent = tasks.length;
+    document.getElementById('ls-done').textContent  = tasks.filter(t=>t.status==="Completed").length;
 
-  updateNavBadges();
+    updateNavBadges();
+    document.getElementById('nt-start').value = TODAY;
 
-  // Set today as default start date
-  document.getElementById('nt-start').value = TODAY;
+    setDbStatus('ok', 'Connected');
 
-  // Remove loader
-  setTimeout(() => {
-    const loader = document.getElementById('loader');
-    loader.classList.add('hidden');
-    setTimeout(() => loader.remove(), 400);
-  }, 600);
+  } catch (e) {
+    console.error('Failed to load tasks from Supabase:', e);
+    setDbStatus('err', 'Connection error');
+    // Show error message in loader instead of crashing
+    loaderLabel.textContent = 'CONNECTION ERROR — check console';
+    loaderLabel.style.color = 'var(--red)';
+    setTimeout(() => {
+      // Still let user in with empty state
+      document.getElementById('ls-total').textContent = '0';
+      document.getElementById('ls-done').textContent  = '0';
+    }, 500);
+  } finally {
+    setTimeout(() => {
+      const loader = document.getElementById('loader');
+      loader.classList.add('hidden');
+      setTimeout(() => loader.remove(), 400);
+    }, 700);
+  }
 });
 </script>
 </body>
