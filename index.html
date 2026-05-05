@@ -610,6 +610,8 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
 }
 
 </style>
+<!-- SheetJS — genera .xlsx real directamente desde el navegador -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -746,7 +748,7 @@ tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0">
             <path d="M7 2v7M4 7l3 3 3-3M2 10v1.5A.5.5 0 002.5 12h9a.5.5 0 00.5-.5V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          Export CSV
+          Export Excel
         </button>
         <button class="btn btn-primary" onclick="navigate('new-task',null);document.querySelectorAll('.nav-item')[1].classList.add('active')">
           + New Task
@@ -1588,14 +1590,212 @@ function updateNavBadges() {
 // ═══════════════════════════════════════════════════════════
 
 function exportData() {
-  const headers = ["ID","Area","Task","Owner","Priority","Status","Start","Deadline","Comments","File"];
-  const rows = tasks.map(t => [t.id,AREAS[t.area].name,t.desc,t.owner,t.priority,t.status,t.start,t.deadline,t.comments,t.file||'']);
-  const csv  = [headers,...rows].map(r => r.map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(",")).join("\n");
-  const blob = new Blob([csv],{type:"text/csv"});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href=url; a.download="OperationAssistant_Export.csv"; a.click();
-  URL.revokeObjectURL(url);
+
+  // ── Colores por PRIORIDAD (columna F) ─────────────────────────────
+  const PRIORITY_FILL = {
+    'Critical': { fgColor: { rgb: 'FFCCCC' } },
+    'High':     { fgColor: { rgb: 'FFDEDE' } },
+    'Medium':   { fgColor: { rgb: 'FFF3E0' } },
+    'Low':      { fgColor: { rgb: 'E8F5E9' } },
+  };
+  const PRIORITY_FONT = {
+    'Critical': { bold: true,  color: { rgb: 'AE2A19' } },
+    'High':     { bold: false, color: { rgb: 'AE2A19' } },
+    'Medium':   { bold: false, color: { rgb: 'C25100' } },
+    'Low':      { bold: false, color: { rgb: '1F845A' } },
+  };
+
+  // ── Colores por ESTADO (columna G) ────────────────────────────────
+  const STATUS_FILL = {
+    'Pending':     { fgColor: { rgb: 'F1F3F5' } },
+    'In Progress': { fgColor: { rgb: 'E9F2FF' } },
+    'Completed':   { fgColor: { rgb: 'DCFFF1' } },
+    'Blocked':     { fgColor: { rgb: 'FFECEB' } },
+  };
+  const STATUS_FONT = {
+    'Pending':     { color: { rgb: '505F79' } },
+    'In Progress': { color: { rgb: '0C66E4' } },
+    'Completed':   { color: { rgb: '1F845A' } },
+    'Blocked':     { color: { rgb: 'AE2A19' } },
+  };
+
+  // ── Estilos base ──────────────────────────────────────────────────
+  const borderSide = { style: 'thin', color: { rgb: 'DEE1E6' } };
+  const allBorders = { top: borderSide, bottom: borderSide, left: borderSide, right: borderSide };
+
+  function baseCell(value, extra = {}) {
+    return {
+      v: value,
+      t: typeof value === 'number' ? 'n' : 's',
+      s: {
+        font:      { name: 'Calibri', sz: 11, ...(extra.font || {}) },
+        fill:      extra.fill ? { patternType: 'solid', ...extra.fill } : { patternType: 'none' },
+        alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+        border:    allBorders,
+      }
+    };
+  }
+
+  function headerCell(value) {
+    return {
+      v: value, t: 's',
+      s: {
+        font:      { name: 'Calibri', sz: 11, bold: true, color: { rgb: 'FFFFFF' } },
+        fill:      { patternType: 'solid', fgColor: { rgb: '172B4D' } },
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border:    allBorders,
+      }
+    };
+  }
+
+  function titleCell(value) {
+    return {
+      v: value, t: 's',
+      s: {
+        font:      { name: 'Calibri', sz: 13, bold: true, color: { rgb: 'FFFFFF' } },
+        fill:      { patternType: 'solid', fgColor: { rgb: '0C66E4' } },
+        alignment: { horizontal: 'center', vertical: 'center' },
+        border:    allBorders,
+      }
+    };
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const wb    = XLSX.utils.book_new();
+
+  // ── Hoja "All Tasks" + una hoja por área ──────────────────────────
+  const sheets = [
+    { name: 'All Tasks', list: tasks },
+    ...Object.entries(AREAS)
+      .map(([code, a]) => ({ name: a.name, list: tasks.filter(t => t.area === code) }))
+      .filter(s => s.list.length > 0)
+  ];
+
+  sheets.forEach(({ name, list }) => {
+    const ws   = {};
+    const COLS = ['A','B','C','D','E','F','G','H','I','J','K'];
+
+    // Fila 1 — título fusionado B1:K1
+    ws['B1'] = titleCell(`${name}   ·   Exported: ${today}`);
+    ['C','D','E','F','G','H','I','J','K'].forEach(col => {
+      ws[`${col}1`] = {
+        v: '', t: 's',
+        s: {
+          font:  { name: 'Calibri', sz: 13, bold: true, color: { rgb: 'FFFFFF' } },
+          fill:  { patternType: 'solid', fgColor: { rgb: '0C66E4' } },
+          alignment: { horizontal: 'center', vertical: 'center' },
+          border: allBorders,
+        }
+      };
+    });
+    // Celda A1 vacía con mismo fondo
+    ws['A1'] = {
+      v: '', t: 's',
+      s: { fill: { patternType: 'solid', fgColor: { rgb: '0C66E4' } }, border: allBorders }
+    };
+
+    // Fila 2 — headers
+    ['#','ID','Area','Task','Owner','Priority','Status','Start Date','Deadline','Comments','File']
+      .forEach((h, i) => { ws[`${COLS[i]}2`] = headerCell(h); });
+
+    // Filas de datos desde fila 3
+    list.forEach((t, idx) => {
+      const row   = idx + 3;
+      const rowBg = idx % 2 === 0
+        ? { patternType: 'solid', fgColor: { rgb: 'FFFFFF' } }
+        : { patternType: 'solid', fgColor: { rgb: 'F8F9FA' } };
+
+      // A — número
+      ws[`A${row}`] = baseCell(idx + 1, { font: { bold: true }, fill: rowBg });
+
+      // B — ID
+      ws[`B${row}`] = baseCell(t.id || '', { fill: rowBg });
+
+      // C — Area
+      ws[`C${row}`] = baseCell(AREAS[t.area] ? AREAS[t.area].name : t.area, { fill: rowBg });
+
+      // D — Task (alineación izquierda)
+      ws[`D${row}`] = {
+        v: t.desc || '', t: 's',
+        s: {
+          font:      { name: 'Calibri', sz: 11 },
+          fill:      rowBg,
+          alignment: { horizontal: 'left', vertical: 'center', wrapText: false },
+          border:    allBorders,
+        }
+      };
+
+      // E — Owner
+      ws[`E${row}`] = baseCell(t.owner || '', { fill: rowBg });
+
+      // F — Priority con color
+      const pFill = PRIORITY_FILL[t.priority] || { fgColor: { rgb: 'F1F3F5' } };
+      const pFont = PRIORITY_FONT[t.priority] || {};
+      ws[`F${row}`] = baseCell(t.priority || '', {
+        fill: { patternType: 'solid', ...pFill },
+        font: pFont,
+      });
+
+      // G — Status con color
+      const sFill = STATUS_FILL[t.status] || { fgColor: { rgb: 'F1F3F5' } };
+      const sFont = STATUS_FONT[t.status] || {};
+      ws[`G${row}`] = baseCell(t.status || '', {
+        fill: { patternType: 'solid', ...sFill },
+        font: sFont,
+      });
+
+      // H — Start Date
+      ws[`H${row}`] = baseCell(t.start || '', { fill: rowBg });
+
+      // I — Deadline (rojo si vencida y no completada)
+      const isOverdue = t.deadline && t.deadline < today && t.status !== 'Completed';
+      ws[`I${row}`] = baseCell(t.deadline || '', {
+        fill: isOverdue ? { patternType: 'solid', fgColor: { rgb: 'FFECEB' } } : rowBg,
+        font: isOverdue ? { color: { rgb: 'AE2A19' }, bold: true } : {},
+      });
+
+      // J — Comments (alineación izquierda, texto wrap)
+      ws[`J${row}`] = {
+        v: t.comments || '', t: 's',
+        s: {
+          font:      { name: 'Calibri', sz: 11, color: { rgb: '505F79' } },
+          fill:      rowBg,
+          alignment: { horizontal: 'left', vertical: 'center', wrapText: true },
+          border:    allBorders,
+        }
+      };
+
+      // K — File
+      ws[`K${row}`] = baseCell(t.file || '', {
+        fill: rowBg,
+        font: t.file ? { color: { rgb: '0C66E4' } } : {},
+      });
+    });
+
+    // Rango total, merges, anchos y alturas
+    ws['!ref']    = `A1:K${list.length + 2}`;
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 10 } }]; // A1:K1
+    ws['!cols']   = [
+      { wch: 4  },  // A — #
+      { wch: 11 },  // B — ID
+      { wch: 13 },  // C — Area
+      { wch: 40 },  // D — Task
+      { wch: 18 },  // E — Owner
+      { wch: 14 },  // F — Priority
+      { wch: 14 },  // G — Status
+      { wch: 12 },  // H — Start Date
+      { wch: 12 },  // I — Deadline
+      { wch: 30 },  // J — Comments
+      { wch: 22 },  // K — File
+    ];
+    const rowHeights = [{ hpt: 24 }, { hpt: 20 }];
+    list.forEach(() => rowHeights.push({ hpt: 18 }));
+    ws['!rows'] = rowHeights;
+
+    XLSX.utils.book_append_sheet(wb, ws, name.slice(0, 31));
+  });
+
+  XLSX.writeFile(wb, `OperationAssistant_${today}.xlsx`);
   toast("Export complete.", "success");
 }
 
