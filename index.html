@@ -996,11 +996,7 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
                 <option value="FIN">Finance</option><option value="OPP">Projects</option><option value="HR">HR</option>
               </select>
             </div>
-            <div class="form-field"><label>Owner *</label>
-              <select id="nt-owner">
-                <option value="">— Select owner —</option>
-              </select>
-            </div>
+            <div class="form-field"><label>Owner *</label><input type="text" id="nt-owner" placeholder="Responsible person"/></div>
           </div>
           <div class="form-grid full">
             <div class="form-field"><label>Task Description *</label><input type="text" id="nt-desc" placeholder="What needs to be done?"/></div>
@@ -1812,7 +1808,7 @@ function downloadFile(taskId) {
 // ═══════════════════════════════════════════════════════════
 async function createTask() {
   const area=document.getElementById('nt-area').value,
-        owner=document.getElementById('nt-owner').value.trim(), // now a select
+        owner=document.getElementById('nt-owner').value.trim(),
         desc=document.getElementById('nt-desc').value.trim(),
         priority=document.getElementById('nt-priority').value,
         status=document.getElementById('nt-status').value,
@@ -1834,8 +1830,7 @@ async function createTask() {
   finally { btn.disabled=false;btn.textContent='Create Task'; }
 }
 function resetNewTaskForm() {
-  ['nt-desc','nt-comments'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('nt-owner').value = currentUser && teamMembers.includes(currentUser) ? currentUser : '';
+  ['nt-owner','nt-desc','nt-comments'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('nt-priority').value='Medium';document.getElementById('nt-status').value='Pending';document.getElementById('nt-start').value='';document.getElementById('nt-deadline').value='';
   removeFile('nt-file','nt-file-preview','nt-file-name');
 }
