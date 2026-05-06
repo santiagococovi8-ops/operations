@@ -486,6 +486,7 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
 <section id="landing">
   <div class="landing-inner">
     <div class="landing-badge">Operation Assistant</div>
+    <p id="landingWelcome" style="font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;min-height:18px;animation:fadeUp .5s ease both;"></p>
     <h1 class="landing-title">OPERATIONS, <span>ORGANIZED.</span></h1>
     <p class="landing-desc">Manage tasks, track progress across areas, and generate weekly reviews — all in one lightweight, cloud-synced dashboard.</p>
     <button class="landing-cta" onclick="enterApp()">
@@ -702,9 +703,9 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
 // Para agregar o cambiar usuarios, editá este objeto:
 // { 'username': 'password' }
 const TEAM_CREDENTIALS = {
-  'jen':    'operations',
+  'admin':    'ops2024',
   'santiago': 'operations',
-  'troy':     'ops2024',
+  'jen':     'operations',
   'dani':     'ops2024',
   'marcus':   'ops2024',
   'carlos':   'ops2024',
@@ -729,6 +730,10 @@ function doLogin() {
   if (TEAM_CREDENTIALS[user] && TEAM_CREDENTIALS[user] === pass) {
     currentUser = user.charAt(0).toUpperCase() + user.slice(1);
     sessionStorage.setItem('oa_user', currentUser);
+
+    // Mostrar mensaje de bienvenida en la landing
+    const welcomeEl = document.getElementById('landingWelcome');
+    if (welcomeEl) welcomeEl.textContent = `Welcome back, ${currentUser} 👋`;
 
     // Ocultar login, mostrar landing
     const loginEl = document.getElementById('loginScreen');
@@ -1257,6 +1262,8 @@ window.addEventListener('load', async () => {
     currentUser=saved;
     document.getElementById('sidebarUser').textContent=currentUser;
     document.getElementById('loginScreen').style.display='none';
+    const welcomeEl=document.getElementById('landingWelcome');
+    if(welcomeEl) welcomeEl.textContent=`Welcome back, ${currentUser} 👋`;
   }
 
   try {
