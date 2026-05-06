@@ -488,14 +488,24 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
   /* Content con padding bottom para la bottom nav */
   .content { padding: 14px 14px 80px; }
 
-  /* KPIs — 2 columnas */
-  .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+  /* KPIs — 3 primeros en fila, 2 últimos centrados */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-bottom: 16px;
+  }
+  .kpi-row .kpi-card:nth-child(4) { grid-column: 1 / 2; }
+  .kpi-row .kpi-card:nth-child(5) { grid-column: 2 / 3; }
+  /* Forzar 4 y 5 en segunda fila centrados */
+  .kpi-row {
+    grid-template-rows: auto auto;
+  }
   .kpi-card { padding: 12px 14px; }
   .kpi-card .kpi-value { font-size: 24px; }
 
-  /* Charts — 1 columna */
-  .charts-row { grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
-  .chart-canvas-wrap { height: 160px; }
+  /* Charts ocultos en mobile — reemplazados por stat strip */
+  .charts-row { display: none; }
+  .mobile-stats-strip { display: flex; }
 
   /* Area grid — 2 columnas */
   .area-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
@@ -506,7 +516,7 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
 
   /* Form — 1 columna, inputs más grandes (touch friendly) */
   .form-grid { grid-template-columns: 1fr; gap: 14px; }
-  .form-field input, .form-field select, .form-field textarea { font-size: 16px; padding: 11px 14px; } /* 16px evita zoom en iOS */
+  .form-field input, .form-field select, .form-field textarea { font-size: 16px; padding: 11px 14px; }
   .form-panel { padding: 16px; }
 
   /* Modal full-screen en mobile */
@@ -537,9 +547,9 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
   .db-status { top: 8px; right: 10px; font-size: 8px; padding: 3px 8px; }
   .db-status .dot { width: 5px; height: 5px; }
 
-  /* Filters wrap */
-  .filters { gap: 6px; }
-  .filter-select { font-size: 13px; padding: 7px 8px; }
+  /* Filters — search full width */
+  .filters { gap: 6px; flex-wrap: wrap; }
+  .filter-select { font-size: 13px; padding: 7px 8px; flex: 1; min-width: 100px; }
   .search-input { width: 100%; font-size: 16px; }
 
   /* Area page header */
@@ -549,11 +559,45 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
 
 /* RESPONSIVE — PHONE 480px */
 @media (max-width: 480px) {
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
   .area-grid { grid-template-columns: repeat(2, 1fr); }
-  .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .landing-title { font-size: 26px; }
   .topbar-actions { gap: 6px; }
   .btn { padding: 7px 12px; font-size: 12px; }
+}
+
+@media (max-width: 768px) {
+  .mobile-search-btn { display: inline-flex !important; }
+}
+═══════════════════════════════════════════════════════════ */
+.mobile-stats-strip {
+  display: none; /* solo visible en mobile via media query */
+  gap: 8px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.mobile-stats-strip::-webkit-scrollbar { display: none; }
+.mobile-stat-pill {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 14px 16px;
+  min-width: 90px; flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+.mobile-stat-pill .msval {
+  font-family: var(--mono); font-size: 28px; font-weight: 500;
+  line-height: 1;
+}
+.mobile-stat-pill .mslbl {
+  font-size: 9px; color: var(--subtle); margin-top: 4px;
+  letter-spacing: .06em; text-transform: uppercase; text-align: center;
+  white-space: nowrap;
+}
+.mobile-stat-pill .mstrend {
+  font-size: 10px; margin-top: 3px; font-weight: 600;
 }
 
 </style>
@@ -701,6 +745,10 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
       <div class="topbar-title">OPERATION ASSISTANT</div>
       <div class="topbar-breadcrumb">/ <span id="breadcrumb">Dashboard</span></div>
       <div class="topbar-actions">
+        <!-- Lupa mobile — abre/cierra search bar -->
+        <button class="btn btn-ghost mobile-search-btn" onclick="toggleMobileSearch()" id="mobileSearchBtn" style="display:none" title="Search">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 9.5l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
         <button class="btn btn-ghost" onclick="exportData()">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0">
             <path d="M7 2v7M4 7l3 3 3-3M2 10v1.5A.5.5 0 002.5 12h9a.5.5 0 00.5-.5V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -713,11 +761,24 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
       </div>
     </header>
 
+    <!-- Mobile search bar — hidden by default, shown on lupa tap -->
+    <div id="mobileSearchBar" style="display:none;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);">
+      <input type="text" class="search-input" id="mobileSearchInput"
+             placeholder="Search tasks…"
+             style="width:100%;font-size:16px"
+             oninput="document.getElementById('searchInput').value=this.value;renderDashboardTable()"
+      />
+    </div>
+
     <div class="content">
 
       <!-- DASHBOARD -->
       <div class="view active" id="view-dashboard">
         <div class="kpi-row" id="kpiRow"></div>
+
+        <!-- Mobile stats strip (oculto en desktop, visible en mobile) -->
+        <div class="mobile-stats-strip" id="mobileStatsStrip"></div>
+
         <div class="charts-row">
           <div class="chart-card">
             <div class="chart-card-title">Tasks by Status</div>
@@ -771,7 +832,11 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
                 <option value="FIN">Finance</option><option value="OPP">Projects</option><option value="HR">HR</option>
               </select>
             </div>
-            <div class="form-field"><label>Owner *</label><input type="text" id="nt-owner" placeholder="Responsible person"/></div>
+            <div class="form-field"><label>Owner *</label>
+              <select id="nt-owner">
+                <option value="">— Select owner —</option>
+              </select>
+            </div>
           </div>
           <div class="form-grid full">
             <div class="form-field"><label>Task Description *</label><input type="text" id="nt-desc" placeholder="What needs to be done?"/></div>
@@ -1030,10 +1095,23 @@ function initRealtime() {
       const { type, record, old_record } = msg.payload.data;
       if (type === 'INSERT') {
         const t = rowToTask(record);
-        if (!tasks.find(x => x.id === t.id)) { tasks.push(t); rebuildCounters(); updateNavBadges(); refreshCurrentView(); toast(`New task ${t.id} added.`, 'success'); }
+        if (!tasks.find(x => x.id === t.id)) {
+          tasks.push(t);
+          rebuildCounters(); updateNavBadges(); refreshCurrentView();
+          if (t.owner !== currentUser) toast(`New task ${t.id} added by ${t.owner}.`, 'success');
+        }
       } else if (type === 'UPDATE') {
         const idx = tasks.findIndex(x => x.id === record.id);
-        if (idx !== -1) { tasks[idx] = rowToTask(record); updateNavBadges(); refreshCurrentView(); }
+        if (idx !== -1) {
+          const oldStatus = tasks[idx].status;
+          tasks[idx] = rowToTask(record);
+          updateNavBadges(); refreshCurrentView();
+          // Solo notificar si el cambio lo hizo otro usuario
+          const updatedTask = tasks[idx];
+          if (updatedTask.owner !== currentUser && oldStatus !== updatedTask.status) {
+            toast(`${updatedTask.owner} updated ${record.id}: ${oldStatus} → ${updatedTask.status}`, 'success');
+          }
+        }
       } else if (type === 'DELETE') {
         const oldId = old_record?.id;
         if (oldId) { tasks = tasks.filter(x => x.id !== oldId); updateNavBadges(); refreshCurrentView(); toast(`Task ${oldId} was removed.`, 'error'); }
@@ -1203,7 +1281,7 @@ function navigate(viewId, navEl) {
 // ═══════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════
-function renderDashboard() { renderKPIs(); renderCharts(); renderAreaCards(); populateOwnerFilter(); renderDashboardTable(); }
+function renderDashboard() { renderKPIs(); renderMobileStatsStrip(); renderCharts(); renderAreaCards(); populateOwnerFilter(); renderDashboardTable(); }
 
 function renderKPIs() {
   const total=tasks.length, completed=tasks.filter(t=>t.status==="Completed").length,
@@ -1278,16 +1356,52 @@ function renderArea(code) {
 // ═══════════════════════════════════════════════════════════
 // WEEKLY REVIEW
 // ═══════════════════════════════════════════════════════════
-function renderWeekly() {
+async function renderWeekly() {
   const completed=tasks.filter(t=>t.status==="Completed").length,delayed=tasks.filter(t=>t.deadline<TODAY&&t.status!=="Completed").length,carryover=tasks.filter(t=>["Pending","Blocked"].includes(t.status)).length;
   document.getElementById('weeklyKPIs').innerHTML=`<div class="metric-mini"><div class="val" style="color:var(--green)">${completed}</div><div class="lbl">Completed This Week</div></div><div class="metric-mini"><div class="val" style="color:var(--red)">${delayed}</div><div class="lbl">Delayed / Overdue</div></div><div class="metric-mini"><div class="val" style="color:var(--orange)">${carryover}</div><div class="lbl">Carry-over to Next Week</div></div>`;
+
+  // Cargar notas guardadas
+  const savedNotes = await dbGetNotes();
+
   const areaBlocks=Object.entries(AREAS).map(([code,a])=>{
     const areaT=tasks.filter(t=>t.area===code),done=areaT.filter(t=>t.status==="Completed"),delayed2=areaT.filter(t=>t.deadline<TODAY&&t.status!=="Completed"),carry=areaT.filter(t=>["Pending","Blocked"].includes(t.status));
     const rows=areaT.map(t=>{const isDone=t.status==="Completed",isDelayed=t.deadline<TODAY&&!isDone,isCarry=["Pending","Blocked"].includes(t.status);return `<tr><td class="task-col">${escHtml(t.desc)}</td><td style="font-weight:500;font-size:11px">${escHtml(t.owner)}</td><td>${statusBadge(t.status)}</td><td style="font-family:var(--mono);font-size:10px;color:var(--subtle)">${t.deadline||'—'}</td><td style="text-align:center">${isDone?'✅':''}</td><td style="text-align:center">${isDelayed?'⚠️':''}</td><td style="text-align:center">${isCarry?'🔁':''}</td></tr>`;}).join('');
-    return `<div class="area-week-block"><div class="area-week-header"><div style="font-family:var(--mono);font-size:10px;font-weight:600;color:${a.hex};letter-spacing:.1em">${a.name.toUpperCase()}</div><div class="mini-badges"><span class="badge badge-completed">✅ ${done.length}</span><span class="badge badge-high">⚠️ ${delayed2.length}</span><span class="badge badge-pending">🔁 ${carry.length}</span></div></div><table class="area-week-table"><thead><tr><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Task</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Owner</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Status</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Deadline</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Done</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Delay</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Carry</th></tr></thead><tbody>${rows}</tbody></table><div contenteditable="true" class="note-area" data-ph="+ Add strategic notes for ${a.name}…"></div></div>`;
+    const savedNote = savedNotes[code] || '';
+    return `<div class="area-week-block"><div class="area-week-header"><div style="font-family:var(--mono);font-size:10px;font-weight:600;color:${a.hex};letter-spacing:.1em">${a.name.toUpperCase()}</div><div class="mini-badges"><span class="badge badge-completed">✅ ${done.length}</span><span class="badge badge-high">⚠️ ${delayed2.length}</span><span class="badge badge-pending">🔁 ${carry.length}</span></div></div><table class="area-week-table"><thead><tr><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Task</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Owner</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Status</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle)">Deadline</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Done</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Delay</th><th style="padding:8px 18px;background:var(--grey-50);font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--subtle);text-align:center">Carry</th></tr></thead><tbody>${rows}</tbody></table><div contenteditable="true" class="note-area" data-area="${code}" data-ph="+ Add strategic notes for ${a.name}…">${escHtml(savedNote)}</div></div>`;
   }).join('');
   document.getElementById('weeklyAreas').innerHTML=`<div class="section-header"><div class="section-title">Area Breakdown</div><div class="section-line"></div></div>${areaBlocks}`;
-  document.querySelectorAll('.note-area').forEach(el=>{const ph=el.getAttribute('data-ph');if(!el.textContent.trim()){el.textContent=ph;el.style.color='var(--subtle)';}el.addEventListener('focus',()=>{if(el.textContent===ph){el.textContent='';el.style.color='var(--text)';el.style.fontStyle='normal';}});el.addEventListener('blur',()=>{if(!el.textContent.trim()){el.textContent=ph;el.style.color='var(--subtle)';el.style.fontStyle='italic';}});});
+
+  // Configurar notas con guardado automático
+  document.querySelectorAll('.note-area').forEach(el=>{
+    const ph   = el.getAttribute('data-ph');
+    const code = el.getAttribute('data-area');
+    // Si no hay contenido guardado, mostrar placeholder
+    if (!el.textContent.trim()) { el.textContent=ph; el.style.color='var(--subtle)'; el.style.fontStyle='italic'; }
+    else { el.style.color='var(--text)'; el.style.fontStyle='normal'; }
+
+    el.addEventListener('focus',()=>{
+      if(el.textContent===ph){el.textContent='';el.style.color='var(--text)';el.style.fontStyle='normal';}
+    });
+
+    // Guardar automáticamente al perder foco (debounced)
+    let saveTimer;
+    el.addEventListener('input', () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        const text = el.textContent.trim();
+        if (text && text !== ph) {
+          await dbSaveNote(code, text);
+          // Pequeña confirmación visual
+          el.style.borderColor = 'var(--green)';
+          setTimeout(() => { el.style.borderColor = ''; }, 1200);
+        }
+      }, 800);
+    });
+
+    el.addEventListener('blur',()=>{
+      if(!el.textContent.trim()){el.textContent=ph;el.style.color='var(--subtle)';el.style.fontStyle='italic';}
+    });
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1316,7 +1430,15 @@ function downloadFile(taskId) {
 // CREATE TASK
 // ═══════════════════════════════════════════════════════════
 async function createTask() {
-  const area=document.getElementById('nt-area').value,owner=document.getElementById('nt-owner').value.trim(),desc=document.getElementById('nt-desc').value.trim(),priority=document.getElementById('nt-priority').value,status=document.getElementById('nt-status').value,start=document.getElementById('nt-start').value,deadline=document.getElementById('nt-deadline').value,comments=document.getElementById('nt-comments').value.trim(),fileInput=document.getElementById('nt-file');
+  const area=document.getElementById('nt-area').value,
+        owner=document.getElementById('nt-owner').value.trim(), // now a select
+        desc=document.getElementById('nt-desc').value.trim(),
+        priority=document.getElementById('nt-priority').value,
+        status=document.getElementById('nt-status').value,
+        start=document.getElementById('nt-start').value,
+        deadline=document.getElementById('nt-deadline').value,
+        comments=document.getElementById('nt-comments').value.trim(),
+        fileInput=document.getElementById('nt-file');
   if(!desc||!owner||!deadline){toast("Please fill in required fields: Description, Owner, Deadline.","error");return;}
   idCounters[area]++;
   const id=`${area}-${String(idCounters[area]).padStart(3,'0')}`;
@@ -1331,7 +1453,8 @@ async function createTask() {
   finally { btn.disabled=false;btn.textContent='Create Task'; }
 }
 function resetNewTaskForm() {
-  ['nt-owner','nt-desc','nt-comments'].forEach(id=>document.getElementById(id).value='');
+  ['nt-desc','nt-comments'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nt-owner').value = currentUser && teamMembers.includes(currentUser) ? currentUser : '';
   document.getElementById('nt-priority').value='Medium';document.getElementById('nt-status').value='Pending';document.getElementById('nt-start').value='';document.getElementById('nt-deadline').value='';
   removeFile('nt-file','nt-file-preview','nt-file-name');
 }
@@ -1438,8 +1561,163 @@ function toast(msg,type="success") {
 function updateNavBadges() { Object.keys(AREAS).forEach(code=>{document.getElementById(`badge-${code}`).textContent=tasks.filter(t=>t.area===code).length;}); }
 
 // ═══════════════════════════════════════════════════════════
-// MOBILE — bottom nav + task cards + area sheet
+// MEJORA 1 — Owner selector poblado desde Supabase Auth
 // ═══════════════════════════════════════════════════════════
+
+let teamMembers = []; // cache de usuarios del equipo
+
+async function loadTeamMembers() {
+  try {
+    // Obtener lista de usuarios desde Supabase Auth admin endpoint
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/admin/users`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const users = data.users || [];
+    teamMembers = users.map(u => nameFromEmail(u.email)).sort();
+  } catch(_) {
+    // Fallback: usar owners existentes en las tareas
+    teamMembers = getOwners();
+  }
+  populateOwnerSelects();
+}
+
+function populateOwnerSelects() {
+  // Poblar el selector del formulario de nueva tarea
+  const sel = document.getElementById('nt-owner');
+  if (!sel) return;
+  const members = teamMembers.length ? teamMembers : getOwners();
+  sel.innerHTML = '<option value="">— Select owner —</option>' +
+    members.map(name => `<option value="${name}">${name}</option>`).join('');
+  // Pre-seleccionar el usuario logueado si está en la lista
+  if (currentUser && members.includes(currentUser)) sel.value = currentUser;
+}
+
+// ═══════════════════════════════════════════════════════════
+// MEJORA 2 — Realtime toast con nombre del usuario que editó
+// ═══════════════════════════════════════════════════════════
+// (Integrado en initRealtime — se actualiza la función existente más abajo)
+
+// ═══════════════════════════════════════════════════════════
+// MEJORA 3 — Mobile stats strip (reemplaza gráficos en mobile)
+// ═══════════════════════════════════════════════════════════
+
+function renderMobileStatsStrip() {
+  const el = document.getElementById('mobileStatsStrip');
+  if (!el) return;
+  const total      = tasks.length;
+  const completed  = tasks.filter(t => t.status === 'Completed').length;
+  const inProgress = tasks.filter(t => t.status === 'In Progress').length;
+  const blocked    = tasks.filter(t => t.status === 'Blocked').length;
+  const pending    = tasks.filter(t => t.status === 'Pending').length;
+  const pct        = total ? Math.round(completed / total * 100) : 0;
+  const overdue    = tasks.filter(t => t.deadline && t.deadline < TODAY && t.status !== 'Completed').length;
+
+  el.innerHTML = `
+    <div class="mobile-stat-pill">
+      <div class="msval" style="color:var(--accent)">${total}</div>
+      <div class="mslbl">Total</div>
+    </div>
+    <div class="mobile-stat-pill">
+      <div class="msval" style="color:var(--green)">${completed}</div>
+      <div class="mslbl">Done</div>
+      <div class="mstrend" style="color:var(--green)">${pct}%</div>
+    </div>
+    <div class="mobile-stat-pill">
+      <div class="msval" style="color:var(--accent)">${inProgress}</div>
+      <div class="mslbl">In Progress</div>
+    </div>
+    <div class="mobile-stat-pill">
+      <div class="msval" style="color:var(--orange)">${pending}</div>
+      <div class="mslbl">Pending</div>
+    </div>
+    <div class="mobile-stat-pill">
+      <div class="msval" style="color:var(--red)">${blocked}</div>
+      <div class="mslbl">Blocked</div>
+    </div>
+    ${overdue > 0 ? `
+    <div class="mobile-stat-pill" style="border-color:rgba(174,42,25,.3)">
+      <div class="msval" style="color:var(--red)">${overdue}</div>
+      <div class="mslbl">Overdue</div>
+      <div class="mstrend" style="color:var(--red)">⚠️</div>
+    </div>` : ''}
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
+// MEJORA 4 — Toggle búsqueda mobile
+// ═══════════════════════════════════════════════════════════
+
+function toggleMobileSearch() {
+  const bar = document.getElementById('mobileSearchBar');
+  const input = document.getElementById('mobileSearchInput');
+  const isVisible = bar.style.display !== 'none';
+  if (isVisible) {
+    bar.style.display = 'none';
+    // Limpiar búsqueda al cerrar
+    input.value = '';
+    document.getElementById('searchInput').value = '';
+    renderDashboardTable();
+  } else {
+    bar.style.display = 'block';
+    setTimeout(() => input.focus(), 100);
+    // Asegurarse de estar en dashboard
+    navigate('dashboard', null);
+    setBottomNav('dashboard');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MEJORA 5 — Quick Complete en task cards (botón directo)
+// ═══════════════════════════════════════════════════════════
+
+async function quickComplete(taskId) {
+  const t = tasks.find(x => x.id === taskId);
+  if (!t || t.status === 'Completed') return;
+  const prev = t.status;
+  t.status = 'Completed';
+  setDbStatus('sync', 'Saving…');
+  try {
+    await dbUpdateTask(t);
+    await dbLogHistory(taskId, 'updated', currentUser || 'User', 'status', prev, 'Completed');
+    updateNavBadges();
+    refreshCurrentView();
+    toast(`Task ${taskId} marked as completed. ✓`, 'success');
+    setDbStatus('ok', 'Saved');
+  } catch(e) {
+    t.status = prev; // revertir
+    toast('Error updating task.', 'error');
+    setDbStatus('err', 'Error');
+    console.error(e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MEJORA 6 — Notas del Weekly Review persistidas en Supabase
+// ═══════════════════════════════════════════════════════════
+
+async function dbSaveNote(areaCode, text) {
+  try {
+    // Upsert en tabla weekly_notes (la creamos abajo)
+    await fetch(`${API_BASE}/weekly_notes`, {
+      method: 'POST',
+      headers: { ...HEADERS, 'Prefer': 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify({ area_code: areaCode, note: text, updated_at: new Date().toISOString() })
+    });
+  } catch(e) { console.warn('Note save failed:', e); }
+}
+
+async function dbGetNotes() {
+  try {
+    const res = await fetch(`${API_BASE}/weekly_notes`, { headers: { ...HEADERS, 'Prefer': '' } });
+    if (!res.ok) return {};
+    const rows = await res.json();
+    return Object.fromEntries(rows.map(r => [r.area_code, r.note]));
+  } catch(_) { return {}; }
+}
+
+
 
 // Marca el ítem activo del bottom nav
 function setBottomNav(id) {
@@ -1485,6 +1763,7 @@ function renderTaskCards(taskList, containerId) {
     const fileTag = t.file
       ? `<div class="file-tag" onclick="downloadFile('${t.id}')" style="margin-top:4px">${fileIcon(t.file)} ${escHtml(t.file)}</div>`
       : '';
+    const isComplete = t.status === 'Completed';
     return `
       <div class="task-card" style="border-left-color:${border}">
         <div class="task-card-top">
@@ -1503,7 +1782,13 @@ function renderTaskCards(taskList, containerId) {
             <div class="task-card-owner">👤 ${escHtml(t.owner)}</div>
             ${t.deadline ? `<div class="task-card-deadline">📅 ${t.deadline}</div>` : ''}
           </div>
-          <button class="task-card-edit" onclick="openEditModal('${t.id}')">Edit</button>
+          <div style="display:flex;gap:6px;align-items:center">
+            ${!isComplete ? `<button
+              onclick="quickComplete('${t.id}')"
+              style="background:var(--green-bg);border:1px solid rgba(31,132,90,.2);color:var(--green);font-family:var(--sans);font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--radius);cursor:pointer;-webkit-tap-highlight-color:transparent"
+              title="Mark as completed">✓</button>` : ''}
+            <button class="task-card-edit" onclick="openEditModal('${t.id}')">Edit</button>
+          </div>
         </div>
       </div>`;
   }).join('');
@@ -1611,6 +1896,8 @@ window.addEventListener('load', async () => {
     updateNavBadges();
     document.getElementById('nt-start').value=TODAY;
     initRealtime();
+    // Cargar usuarios del equipo para el selector de owner
+    loadTeamMembers();
   } catch(e) {
     console.error('Failed to load tasks from Supabase:',e);
     setDbStatus('err','Connection error');
