@@ -949,16 +949,12 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
           <div class="attention-dots" id="attentionDots"></div>
         </div>
 
-        <!-- Filtros + tabla (colapsados, accesibles desde link) -->
+        <!-- Filtros + tabla siempre visibles -->
         <div class="section-header" style="margin-top:4px">
           <div class="section-title">All Tasks</div>
           <div class="section-line"></div>
-          <button onclick="toggleFullTable()" id="toggleTableBtn"
-            style="font-family:var(--mono);font-size:9px;color:var(--accent);background:none;border:none;cursor:pointer;white-space:nowrap;letter-spacing:.06em;text-transform:uppercase;padding:0 0 0 12px">
-            Show table ↓
-          </button>
         </div>
-        <div id="fullTableWrap" style="display:none">
+        <div id="fullTableWrap">
           <div class="filters">
             <select class="filter-select" id="filterArea" onchange="renderDashboardTable()">
               <option value="">All Areas</option>
@@ -1707,14 +1703,6 @@ async function attentionComplete(taskId) {
 }
 
 // Toggle tabla completa
-function toggleFullTable() {
-  const wrap = document.getElementById('fullTableWrap');
-  const btn  = document.getElementById('toggleTableBtn');
-  const open = wrap.style.display !== 'none';
-  wrap.style.display = open ? 'none' : 'block';
-  btn.textContent    = open ? 'Show table ↓' : 'Hide table ↑';
-  if (!open) renderDashboardTable();
-}
 
 // ═══════════════════════════════════════════════════════════
 // DASHBOARD TABLE (ahora oculta por defecto, accesible)
