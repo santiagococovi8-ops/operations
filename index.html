@@ -600,6 +600,135 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
   font-size: 10px; margin-top: 3px; font-weight: 600;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ATTENTION PANEL — reemplaza la tabla del dashboard
+═══════════════════════════════════════════════════════════ */
+.attention-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.attention-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--grey-50);
+}
+.attention-header-left {
+  display: flex; align-items: center; gap: 10px;
+}
+.attention-label {
+  font-family: var(--mono); font-size: 9px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--subtle);
+}
+.attention-count {
+  font-family: var(--mono); font-size: 9px;
+  background: var(--grey-150); color: var(--muted);
+  padding: 2px 8px; border-radius: 10px;
+}
+.attention-controls { display: flex; align-items: center; gap: 8px; }
+.attention-btn {
+  background: none; border: 1px solid var(--border2); color: var(--muted);
+  width: 28px; height: 28px; border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 12px;
+  transition: background var(--transition), color var(--transition);
+}
+.attention-btn:hover { background: var(--grey-100); color: var(--text); }
+.attention-pause-btn {
+  background: none; border: 1px solid var(--border2); color: var(--muted);
+  width: 28px; height: 28px; border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 10px;
+  transition: background var(--transition), color var(--transition);
+}
+.attention-pause-btn:hover { background: var(--grey-100); color: var(--text); }
+.attention-pause-btn.paused { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+.attention-body {
+  padding: 24px 28px;
+  min-height: 140px;
+  position: relative;
+  transition: opacity .2s ease;
+}
+.attention-body.fading { opacity: 0; }
+
+.attention-urgency-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 5px; margin-bottom: 12px;
+}
+.attention-task-title {
+  font-size: 17px; font-weight: 700; color: var(--text);
+  line-height: 1.3; margin-bottom: 8px; letter-spacing: -.01em;
+}
+.attention-task-meta {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.attention-task-meta span { font-size: 12px; color: var(--muted); }
+.attention-task-meta .sep { color: var(--border2); }
+.attention-task-comment {
+  font-size: 12px; color: var(--subtle); font-style: italic;
+  margin-bottom: 16px; padding: 8px 12px;
+  background: var(--grey-50); border-radius: var(--radius);
+  border-left: 2px solid var(--border2);
+}
+
+.attention-actions {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+
+/* Progress bar que indica el tiempo hasta el next auto-rotate */
+.attention-progress-bar {
+  height: 2px; background: var(--border);
+  position: relative; overflow: hidden;
+}
+.attention-progress-fill {
+  height: 100%; background: var(--accent);
+  width: 0%;
+  transition: width linear;
+}
+
+/* Dots de navegación */
+.attention-dots {
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 10px 20px 14px;
+}
+.attention-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border2); cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+  border: none; padding: 0;
+}
+.attention-dot.active {
+  background: var(--accent);
+  transform: scale(1.3);
+}
+.attention-dot:hover { background: var(--grey-300); }
+
+/* Empty state */
+.attention-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 48px 20px; text-align: center; gap: 10px;
+}
+.attention-empty .icon { font-size: 32px; }
+.attention-empty .title { font-size: 14px; font-weight: 600; color: var(--text); }
+.attention-empty .sub { font-size: 12px; color: var(--subtle); }
+
+/* Mobile — panel más compacto */
+@media (max-width: 768px) {
+  .attention-body { padding: 16px; min-height: 120px; }
+  .attention-task-title { font-size: 15px; }
+  .attention-header { padding: 10px 14px; }
+  .attention-actions { gap: 6px; }
+  .attention-actions .btn { padding: 7px 12px; font-size: 12px; }
+}
+
 </style>
 </head>
 <body>
@@ -791,34 +920,73 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
         </div>
         <div class="section-header"><div class="section-title">Area Overview</div><div class="section-line"></div></div>
         <div class="area-grid" id="areaGrid"></div>
-        <div class="section-header"><div class="section-title">All Tasks</div><div class="section-line"></div></div>
-        <div class="filters">
-          <select class="filter-select" id="filterArea" onchange="renderDashboardTable()">
-            <option value="">All Areas</option>
-            <option value="ACC">Account</option><option value="OPC">Operations</option>
-            <option value="FIN">Finance</option><option value="OPP">Projects</option><option value="HR">HR</option>
-          </select>
-          <select class="filter-select" id="filterStatus" onchange="renderDashboardTable()">
-            <option value="">All Statuses</option>
-            <option value="Pending">Pending</option><option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option><option value="Blocked">Blocked</option>
-          </select>
-          <select class="filter-select" id="filterOwner" onchange="renderDashboardTable()">
-            <option value="">All Owners</option>
-          </select>
-          <input type="text" class="search-input" id="searchInput" placeholder="Search tasks…" oninput="renderDashboardTable()"/>
+
+        <!-- ATTENTION PANEL — reemplaza la tabla -->
+        <div class="section-header">
+          <div class="section-title">Needs Attention</div>
+          <div class="section-line"></div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>ID</th><th>Area</th><th>Task</th><th>Owner</th>
-              <th>Priority</th><th>Status</th><th>Deadline</th><th>Urgency</th><th>Actions</th>
-            </tr></thead>
-            <tbody id="dashTbody"></tbody>
-          </table>
+        <div class="attention-panel" id="attentionPanel">
+          <!-- Header -->
+          <div class="attention-header">
+            <div class="attention-header-left">
+              <span class="attention-label">Next action</span>
+              <span class="attention-count" id="attentionCount">—</span>
+            </div>
+            <div class="attention-controls">
+              <button class="attention-btn" onclick="attentionPrev()" title="Previous">‹</button>
+              <button class="attention-pause-btn" id="attentionPauseBtn" onclick="toggleAttentionPause()" title="Pause rotation">⏸</button>
+              <button class="attention-btn" onclick="attentionNext()" title="Next">›</button>
+            </div>
+          </div>
+          <!-- Body -->
+          <div class="attention-body" id="attentionBody"></div>
+          <!-- Progress bar -->
+          <div class="attention-progress-bar">
+            <div class="attention-progress-fill" id="attentionProgress"></div>
+          </div>
+          <!-- Dots -->
+          <div class="attention-dots" id="attentionDots"></div>
         </div>
-        <!-- Mobile task cards (hidden on desktop) -->
-        <div class="task-card-list" id="dashCards"></div>
+
+        <!-- Filtros + tabla (colapsados, accesibles desde link) -->
+        <div class="section-header" style="margin-top:4px">
+          <div class="section-title">All Tasks</div>
+          <div class="section-line"></div>
+          <button onclick="toggleFullTable()" id="toggleTableBtn"
+            style="font-family:var(--mono);font-size:9px;color:var(--accent);background:none;border:none;cursor:pointer;white-space:nowrap;letter-spacing:.06em;text-transform:uppercase;padding:0 0 0 12px">
+            Show table ↓
+          </button>
+        </div>
+        <div id="fullTableWrap" style="display:none">
+          <div class="filters">
+            <select class="filter-select" id="filterArea" onchange="renderDashboardTable()">
+              <option value="">All Areas</option>
+              <option value="ACC">Account</option><option value="OPC">Operations</option>
+              <option value="FIN">Finance</option><option value="OPP">Projects</option><option value="HR">HR</option>
+            </select>
+            <select class="filter-select" id="filterStatus" onchange="renderDashboardTable()">
+              <option value="">All Statuses</option>
+              <option value="Pending">Pending</option><option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option><option value="Blocked">Blocked</option>
+            </select>
+            <select class="filter-select" id="filterOwner" onchange="renderDashboardTable()">
+              <option value="">All Owners</option>
+            </select>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search tasks…" oninput="renderDashboardTable()"/>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>ID</th><th>Area</th><th>Task</th><th>Owner</th>
+                <th>Priority</th><th>Status</th><th>Deadline</th><th>Urgency</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="dashTbody"></tbody>
+            </table>
+          </div>
+          <!-- Mobile task cards (hidden on desktop) -->
+          <div class="task-card-list" id="dashCards"></div>
+        </div>
       </div>
 
       <!-- NEW TASK -->
@@ -1281,7 +1449,7 @@ function navigate(viewId, navEl) {
 // ═══════════════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════
-function renderDashboard() { renderKPIs(); renderMobileStatsStrip(); renderCharts(); renderAreaCards(); populateOwnerFilter(); renderDashboardTable(); }
+function renderDashboard() { renderKPIs(); renderMobileStatsStrip(); renderCharts(); renderAreaCards(); populateOwnerFilter(); renderDashboardTable(); renderAttentionPanel(); }
 
 function renderKPIs() {
   const total=tasks.length, completed=tasks.filter(t=>t.status==="Completed").length,
@@ -1326,6 +1494,231 @@ function populateOwnerFilter() {
   sel.innerHTML='<option value="">All Owners</option>'+getOwners().map(o=>`<option value="${o}" ${o===cur?'selected':''}>${o}</option>`).join('');
 }
 
+// ═══════════════════════════════════════════════════════════
+// ATTENTION PANEL
+// ═══════════════════════════════════════════════════════════
+
+let attentionIndex   = 0;
+let attentionTimer   = null;
+let attentionPaused  = false;
+let attentionList    = [];
+const ATTENTION_INTERVAL = 8000; // ms entre rotaciones
+
+// Prioridad de urgencia: Overdue Blocked > Overdue > Blocked > Due Soon > In Progress > Pending
+function buildAttentionList() {
+  const active = tasks.filter(t => t.status !== 'Completed');
+  const score = t => {
+    const over = t.deadline && t.deadline < TODAY && t.status !== 'Completed';
+    if (over && t.status === 'Blocked')    return 0;
+    if (over)                              return 1;
+    if (t.status === 'Blocked')            return 2;
+    if (t.priority === 'Critical')         return 3;
+    if (t.priority === 'High')             return 4;
+    const diff = t.deadline ? (new Date(t.deadline) - new Date(TODAY)) / 86400000 : 99;
+    if (diff <= 3)                         return 5;
+    if (t.status === 'In Progress')        return 6;
+    return 7;
+  };
+  return [...active].sort((a, b) => score(a) - score(b));
+}
+
+function urgencyTag(t) {
+  const over = t.deadline && t.deadline < TODAY;
+  if (over && t.status === 'Blocked')
+    return { text:'🔴 Overdue · Blocked', bg:'var(--red-bg)',   color:'var(--red)' };
+  if (over)
+    return { text:'🔴 Overdue',           bg:'var(--red-bg)',   color:'var(--red)' };
+  if (t.status === 'Blocked')
+    return { text:'⛔ Blocked',            bg:'var(--red-bg)',   color:'var(--red)' };
+  if (t.priority === 'Critical')
+    return { text:'🔥 Critical',           bg:'var(--red-bg)',   color:'var(--red)' };
+  if (t.priority === 'High')
+    return { text:'⚠️ High Priority',      bg:'var(--orange-bg)',color:'var(--orange)' };
+  const diff = t.deadline ? (new Date(t.deadline) - new Date(TODAY)) / 86400000 : 99;
+  if (diff <= 3)
+    return { text:'🟠 Due Soon',           bg:'var(--orange-bg)',color:'var(--orange)' };
+  if (t.status === 'In Progress')
+    return { text:'🔵 In Progress',        bg:'var(--accent-bg)',color:'var(--accent)' };
+  return   { text:'⬜ Pending',            bg:'var(--grey-100)', color:'var(--muted)' };
+}
+
+function renderAttentionPanel() {
+  attentionList = buildAttentionList();
+  const body  = document.getElementById('attentionBody');
+  const dots  = document.getElementById('attentionDots');
+  const count = document.getElementById('attentionCount');
+  if (!body) return;
+
+  clearAttentionTimer();
+
+  if (!attentionList.length) {
+    body.innerHTML = `
+      <div class="attention-empty">
+        <div class="icon">🎉</div>
+        <div class="title">All caught up!</div>
+        <div class="sub">No pending tasks. Great work.</div>
+      </div>`;
+    if (dots)  dots.innerHTML  = '';
+    if (count) count.textContent = '0 tasks';
+    document.getElementById('attentionProgress').style.width = '0%';
+    return;
+  }
+
+  if (attentionIndex >= attentionList.length) attentionIndex = 0;
+  if (count) count.textContent = `${attentionList.length} task${attentionList.length !== 1 ? 's' : ''}`;
+
+  // Render current card
+  showAttentionCard(attentionIndex, false);
+
+  // Render dots (max 8 visible)
+  const maxDots = Math.min(attentionList.length, 8);
+  if (dots) {
+    dots.innerHTML = Array.from({ length: maxDots }, (_, i) =>
+      `<button class="attention-dot ${i === attentionIndex ? 'active' : ''}" onclick="goToAttention(${i})"></button>`
+    ).join('');
+  }
+
+  if (!attentionPaused) startAttentionTimer();
+}
+
+function showAttentionCard(idx, fade = true) {
+  const body = document.getElementById('attentionBody');
+  if (!body) return;
+  const t   = attentionList[idx];
+  const tag = urgencyTag(t);
+  const urg = urgency(t.deadline, t.status);
+  const areaInfo = AREAS[t.area] || { name: t.area, hex: '#6b778c' };
+
+  const cardHTML = `
+    <div>
+      <div class="attention-urgency-tag" style="background:${tag.bg};color:${tag.color}">
+        ${tag.text}
+      </div>
+      <div class="attention-task-title">${escHtml(t.desc)}</div>
+      <div class="attention-task-meta">
+        <span style="font-weight:600;color:${areaInfo.hex}">${areaInfo.name}</span>
+        <span class="sep">·</span>
+        <span>👤 ${escHtml(t.owner)}</span>
+        <span class="sep">·</span>
+        <span>${priorityBadge(t.priority)}</span>
+        ${t.deadline ? `<span class="sep">·</span><span style="font-family:var(--mono);font-size:11px">📅 ${t.deadline}</span>` : ''}
+        <span class="sep">·</span>
+        <span class="id-chip">${t.id}</span>
+      </div>
+      ${t.comments ? `<div class="attention-task-comment">${escHtml(t.comments)}</div>` : ''}
+      <div class="attention-actions">
+        <button class="btn btn-primary" onclick="attentionComplete('${t.id}')">✓ Mark Complete</button>
+        <button class="btn btn-ghost"   onclick="openEditModal('${t.id}')">Edit</button>
+        <button class="btn btn-ghost"   onclick="navigate('area-${t.area}',document.getElementById('nav-${t.area}'))">View Area →</button>
+      </div>
+    </div>`;
+
+  if (fade) {
+    body.classList.add('fading');
+    setTimeout(() => {
+      body.innerHTML = cardHTML;
+      body.classList.remove('fading');
+      updateAttentionDots(idx);
+    }, 200);
+  } else {
+    body.innerHTML = cardHTML;
+    updateAttentionDots(idx);
+  }
+}
+
+function updateAttentionDots(idx) {
+  document.querySelectorAll('.attention-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+}
+
+function startAttentionTimer() {
+  clearAttentionTimer();
+  const fill = document.getElementById('attentionProgress');
+  if (fill) { fill.style.transition = 'none'; fill.style.width = '0%'; }
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (fill) { fill.style.transition = `width ${ATTENTION_INTERVAL}ms linear`; fill.style.width = '100%'; }
+    });
+  });
+  attentionTimer = setTimeout(() => {
+    attentionIndex = (attentionIndex + 1) % attentionList.length;
+    showAttentionCard(attentionIndex, true);
+    startAttentionTimer();
+  }, ATTENTION_INTERVAL);
+}
+
+function clearAttentionTimer() {
+  if (attentionTimer) { clearTimeout(attentionTimer); attentionTimer = null; }
+  const fill = document.getElementById('attentionProgress');
+  if (fill) { fill.style.transition = 'none'; fill.style.width = '0%'; }
+}
+
+function attentionNext() {
+  if (!attentionList.length) return;
+  attentionIndex = (attentionIndex + 1) % attentionList.length;
+  showAttentionCard(attentionIndex, true);
+  if (!attentionPaused) startAttentionTimer();
+}
+
+function attentionPrev() {
+  if (!attentionList.length) return;
+  attentionIndex = (attentionIndex - 1 + attentionList.length) % attentionList.length;
+  showAttentionCard(attentionIndex, true);
+  if (!attentionPaused) startAttentionTimer();
+}
+
+function goToAttention(idx) {
+  attentionIndex = idx;
+  showAttentionCard(idx, true);
+  if (!attentionPaused) startAttentionTimer();
+}
+
+function toggleAttentionPause() {
+  attentionPaused = !attentionPaused;
+  const btn = document.getElementById('attentionPauseBtn');
+  if (attentionPaused) {
+    clearAttentionTimer();
+    if (btn) { btn.classList.add('paused'); btn.textContent = '▶'; btn.title = 'Resume rotation'; }
+  } else {
+    startAttentionTimer();
+    if (btn) { btn.classList.remove('paused'); btn.textContent = '⏸'; btn.title = 'Pause rotation'; }
+  }
+}
+
+async function attentionComplete(taskId) {
+  const t = tasks.find(x => x.id === taskId);
+  if (!t) return;
+  const prev = t.status;
+  t.status = 'Completed';
+  setDbStatus('sync', 'Saving…');
+  try {
+    await dbUpdateTask(t);
+    await dbLogHistory(taskId, 'updated', currentUser || 'User', 'status', prev, 'Completed');
+    updateNavBadges();
+    toast(`Task ${taskId} completed. ✓`, 'success');
+    setDbStatus('ok', 'Saved');
+    renderDashboard(); // re-render panel con la tarea removida
+  } catch(e) {
+    t.status = prev;
+    toast('Error updating task.', 'error');
+    setDbStatus('err', 'Error');
+  }
+}
+
+// Toggle tabla completa
+function toggleFullTable() {
+  const wrap = document.getElementById('fullTableWrap');
+  const btn  = document.getElementById('toggleTableBtn');
+  const open = wrap.style.display !== 'none';
+  wrap.style.display = open ? 'none' : 'block';
+  btn.textContent    = open ? 'Show table ↓' : 'Hide table ↑';
+  if (!open) renderDashboardTable();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DASHBOARD TABLE (ahora oculta por defecto, accesible)
+// ═══════════════════════════════════════════════════════════
 function renderDashboardTable() {
   const area=document.getElementById('filterArea').value,status=document.getElementById('filterStatus').value,owner=document.getElementById('filterOwner').value,search=document.getElementById('searchInput').value.toLowerCase();
   const filtered=tasks.filter(t=>(!area||t.area===area)&&(!status||t.status===status)&&(!owner||t.owner===owner)&&(!search||t.desc.toLowerCase().includes(search)||t.owner.toLowerCase().includes(search)));
