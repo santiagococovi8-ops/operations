@@ -1102,11 +1102,11 @@ tbody tr.row-waiting td:first-child { border-left:3px solid var(--purple); }
     <nav style="flex:1;padding-bottom:12px;">
       <div class="nav-section" style="margin-top:10px;">
         <div class="nav-label">Main</div>
-        <div class="nav-item" id="nav-today" onclick="navigate('today',this)">
+        <div class="nav-item active" id="nav-today" onclick="navigate('today',this)">
           <span class="dot" style="background:#e74c8b"></span>Today
           <span class="badge" id="badge-today" style="background:var(--red-bg);color:var(--red)">0</span>
         </div>
-        <div class="nav-item active" onclick="navigate('dashboard',this)">
+        <div class="nav-item" onclick="navigate('dashboard',this)">
           <span class="dot" style="background:var(--accent)"></span>Dashboard
         </div>
         <div class="nav-item" onclick="navigate('new-task',this)">
@@ -1187,7 +1187,7 @@ tbody tr.row-waiting td:first-child { border-left:3px solid var(--purple); }
     <div class="content">
 
       <!-- DASHBOARD -->
-      <div class="view active" id="view-dashboard">
+      <div class="view" id="view-dashboard">
         <div class="kpi-row" id="kpiRow"></div>
 
         <!-- Mobile stats strip (oculto en desktop, visible en mobile) -->
