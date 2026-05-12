@@ -238,7 +238,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
 .btn-danger:hover { background:var(--red-bg); }
 .btn:disabled { opacity:.5; cursor:not-allowed; transform:none!important; }
 
-.content { flex:1; padding:28px; overflow-x:hidden; }
+.content { flex:1; padding:0 28px 28px; overflow-x:hidden; }
+.view.active { display:block; animation:fadeSlide .22s ease; padding-top:28px; }
+#view-area-ACC.active, #view-area-OPC.active, #view-area-FIN.active, #view-area-OPP.active, #view-area-HR.active { padding-top:0; }
 .view { display:none; }
 .view.active { display:block; animation:fadeSlide .22s ease; }
 @keyframes fadeSlide { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
@@ -361,6 +363,7 @@ tbody td { padding:11px 14px; font-size:13px; vertical-align:middle; }
 .note-area:focus { border-color:var(--accent); color:var(--text); font-style:normal; }
 
 /* AREA PAGE HEADER */
+#view-area-ACC, #view-area-OPC, #view-area-FIN, #view-area-OPP, #view-area-HR { padding-top:0; margin-top:0; }
 .area-page-header { display:flex; align-items:center; gap:14px; margin-bottom:24px; padding-bottom:18px; border-bottom:1px solid var(--border); }
 .area-page-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 .area-page-name { font-size:18px; font-weight:700; color:var(--text); letter-spacing:-.01em; }
@@ -685,7 +688,9 @@ input[type="checkbox"].row-cb {
   .topbar-actions .btn span { display: none; }
 
   /* Content con padding bottom para la bottom nav */
-  .content { padding: 14px 14px 80px; }
+  .content { padding: 0 14px 80px; }
+  .view.active { padding-top: 14px; }
+  #view-area-ACC.active, #view-area-OPC.active, #view-area-FIN.active, #view-area-OPP.active, #view-area-HR.active { padding-top: 0; }
 
   /* KPIs — 3 primeros en fila, 2 últimos centrados */
   .kpi-row {
@@ -931,6 +936,77 @@ input[type="checkbox"].row-cb {
   .attention-actions .btn { padding: 7px 12px; font-size: 12px; }
 }
 
+
+/* ═══ TODAY VIEW ═══ */
+.today-hero { display:flex; align-items:center; gap:16px; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--border); }
+.today-date-block { font-family:var(--mono); font-size:10px; color:var(--subtle); letter-spacing:.1em; text-transform:uppercase; }
+.today-title { font-size:20px; font-weight:700; color:var(--text); letter-spacing:-.02em; margin-top:2px; }
+.today-empty { text-align:center; padding:60px 20px; color:var(--subtle); font-size:14px; }
+.today-section { margin-bottom:28px; }
+.today-section-label { font-family:var(--mono); font-size:9px; font-weight:500; color:var(--subtle); letter-spacing:.12em; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.today-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+.today-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:6px; transition:box-shadow var(--transition); }
+.today-row:hover { box-shadow:var(--shadow-sm); }
+.today-row.overdue { border-left:3px solid var(--red); background:var(--red-bg); }
+.today-row.waiting { border-left:3px solid var(--purple); background:var(--purple-bg); }
+.today-row.due-today { border-left:3px solid var(--orange); }
+.today-row-desc { flex:1; font-size:13px; font-weight:500; color:var(--text); }
+.today-row-meta { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.today-time-chip { font-family:var(--mono); font-size:11px; background:var(--grey-100); color:var(--muted); padding:2px 7px; border-radius:4px; white-space:nowrap; }
+.today-time-chip.overdue { background:var(--red-bg); color:var(--red); }
+
+/* ═══ DUE TIME chip ═══ */
+.due-time-chip { font-family:var(--mono); font-size:10px; color:var(--muted); background:var(--grey-100); padding:1px 6px; border-radius:4px; margin-left:4px; }
+
+/* ═══ WAITING ON status ═══ */
+.badge-waiting { background:var(--purple-bg); color:var(--purple); }
+.waiting-chip { display:inline-flex; align-items:center; gap:4px; font-family:var(--mono); font-size:10px; color:var(--purple); background:var(--purple-bg); border:1px solid rgba(94,77,178,.2); padding:2px 8px; border-radius:5px; margin-top:3px; }
+
+/* ═══ REMINDER chip ═══ */
+.reminder-chip { display:inline-flex; align-items:center; gap:4px; font-family:var(--mono); font-size:10px; color:var(--green); background:var(--green-bg); border:1px solid rgba(31,132,90,.2); padding:2px 8px; border-radius:5px; margin-top:3px; }
+
+/* ═══ TABLE ROW COLOR CODING ═══ */
+tbody tr.row-overdue td { background:var(--red-bg) !important; }
+tbody tr.row-overdue td:first-child { border-left:3px solid var(--red); }
+tbody tr.row-soon td { background:var(--orange-bg) !important; }
+tbody tr.row-soon td:first-child { border-left:3px solid var(--orange); }
+tbody tr.row-waiting td { background:var(--purple-bg) !important; }
+tbody tr.row-waiting td:first-child { border-left:3px solid var(--purple); }
+
+/* ═══ RELATIVE DAYS CHIP ═══ */
+.days-chip { font-family:var(--mono); font-size:10px; padding:1px 6px; border-radius:4px; white-space:nowrap; }
+.days-chip.overdue { background:var(--red-bg); color:var(--red); }
+.days-chip.soon { background:var(--orange-bg); color:var(--orange); }
+.days-chip.ok { background:var(--green-bg); color:var(--green); }
+.days-chip.far { background:var(--grey-100); color:var(--muted); }
+
+/* ═══ SIDEBAR URGENCY DOT ═══ */
+.nav-item .urgency-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; display:none; margin-left:2px; }
+.nav-item .urgency-dot.red { background:var(--red); display:inline-block; }
+.nav-item .urgency-dot.orange { background:var(--orange); display:inline-block; }
+
+/* ═══ ACTIVITY LOG ═══ */
+#view-activity .activity-log { display:flex; flex-direction:column; gap:8px; }
+.activity-item { display:flex; align-items:flex-start; gap:10px; padding:10px 14px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); font-size:12px; }
+.activity-item .ai-time { font-family:var(--mono); font-size:10px; color:var(--subtle); white-space:nowrap; flex-shrink:0; min-width:90px; }
+.activity-item .ai-text { flex:1; color:var(--muted); line-height:1.4; }
+.activity-item .ai-text strong { color:var(--text); }
+.activity-item.created { border-left:2px solid var(--green); }
+.activity-item.updated { border-left:2px solid var(--accent); }
+.activity-item.deleted { border-left:2px solid var(--red); }
+.activity-header { display:flex; align-items:center; gap:12px; margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid var(--border); }
+
+/* ═══ COMPACT MODE ═══ */
+.compact-mode tbody td { padding:5px 14px !important; }
+.compact-mode tbody tr { line-height:1.3; }
+
+/* ═══ OWNER AVATAR ═══ */
+.owner-avatar { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; font-size:9px; font-weight:700; font-family:var(--mono); flex-shrink:0; margin-right:5px; vertical-align:middle; }
+
+/* ═══ COMPACT TOGGLE ═══ */
+.compact-toggle { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); cursor:pointer; user-select:none; }
+.compact-toggle input { accent-color:var(--accent); cursor:pointer; }
+
 </style>
 </head>
 <body>
@@ -1029,6 +1105,10 @@ input[type="checkbox"].row-cb {
     <nav style="flex:1;padding-bottom:12px;">
       <div class="nav-section" style="margin-top:10px;">
         <div class="nav-label">Main</div>
+        <div class="nav-item" id="nav-today" onclick="navigate('today',this)">
+          <span class="dot" style="background:#e74c8b"></span>Today
+          <span class="badge" id="badge-today" style="background:var(--red-bg);color:var(--red)">0</span>
+        </div>
         <div class="nav-item active" onclick="navigate('dashboard',this)">
           <span class="dot" style="background:var(--accent)"></span>Dashboard
         </div>
@@ -1042,28 +1122,31 @@ input[type="checkbox"].row-cb {
         <div class="nav-item" onclick="navigate('timeline',this)">
           <span class="dot" style="background:var(--purple)"></span>Timeline
         </div>
+        <div class="nav-item" onclick="navigate('activity',this)"><span class="dot" style="background:var(--grey-500)"></span>Activity Log
+          <span class="dot" style="background:var(--purple)"></span>Timeline
+        </div>
       </div>
       <div class="nav-section" style="margin-top:16px;">
         <div class="nav-label">Areas</div>
         <div class="nav-item" onclick="navigate('area-ACC',this)" id="nav-ACC">
           <span class="dot" style="background:var(--accent)"></span>Account
-          <span class="badge" id="badge-ACC">0</span>
+          <span class="urgency-dot" id="udot-ACC"></span><span class="badge" id="badge-ACC">0</span>
         </div>
         <div class="nav-item" onclick="navigate('area-OPC',this)" id="nav-OPC">
           <span class="dot" style="background:var(--green)"></span>Operations
-          <span class="badge" id="badge-OPC">0</span>
+          <span class="urgency-dot" id="udot-OPC"></span><span class="badge" id="badge-OPC">0</span>
         </div>
         <div class="nav-item" onclick="navigate('area-FIN',this)" id="nav-FIN">
           <span class="dot" style="background:var(--orange)"></span>Finance
-          <span class="badge" id="badge-FIN">0</span>
+          <span class="urgency-dot" id="udot-FIN"></span><span class="badge" id="badge-FIN">0</span>
         </div>
         <div class="nav-item" onclick="navigate('area-OPP',this)" id="nav-OPP">
           <span class="dot" style="background:var(--purple)"></span>Projects
-          <span class="badge" id="badge-OPP">0</span>
+          <span class="urgency-dot" id="udot-OPP"></span><span class="badge" id="badge-OPP">0</span>
         </div>
         <div class="nav-item" onclick="navigate('area-HR',this)" id="nav-HR">
           <span class="dot" style="background:var(--red)"></span>HR
-          <span class="badge" id="badge-HR">0</span>
+          <span class="urgency-dot" id="udot-HR"></span><span class="badge" id="badge-HR">0</span>
         </div>
       </div>
     </nav>
@@ -1190,6 +1273,7 @@ input[type="checkbox"].row-cb {
               <option value="">All Owners</option>
             </select>
             <input type="text" class="search-input" id="searchInput" placeholder="Search tasks…" oninput="onFilterChange()"/>
+            <label class="compact-toggle" title="Compact rows"><input type="checkbox" id="compactToggle" onchange="toggleCompact(this.checked)"> Compact</label>
             <button class="filters-clear-btn" id="filtersClearBtn" onclick="clearAllFilters()">× Clear filters</button>
           </div>
           </div>
@@ -1207,6 +1291,12 @@ input[type="checkbox"].row-cb {
           <div class="task-card-list" id="dashCards"></div>
         </div>
       </div>
+
+      <!-- TODAY VIEW -->
+      <div class="view" id="view-today"></div>
+
+      <!-- ACTIVITY LOG -->
+      <div class="view" id="view-activity"></div>
 
       <!-- NEW TASK -->
       <div class="view" id="view-new-task">
@@ -1244,10 +1334,14 @@ input[type="checkbox"].row-cb {
               <select id="nt-status">
                 <option value="Pending" selected>Pending</option><option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option><option value="Blocked">Blocked</option>
+                <option value="Waiting on">Waiting on…</option>
               </select>
             </div>
             <div class="form-field"><label>Start Date</label><input type="date" id="nt-start"/></div>
             <div class="form-field"><label>Deadline *</label><input type="date" id="nt-deadline"/></div>
+            <div class="form-field"><label>Due Time</label><input type="time" id="nt-duetime" placeholder="e.g. 14:00"/></div>
+            <div class="form-field"><label>Remind Me On</label><input type="date" id="nt-reminder"/></div>
+            <div class="form-field"><label>Waiting On</label><input type="text" id="nt-waitingon" placeholder="Person / team / entity"/></div>
           </div>
           <div class="form-grid full">
             <div class="form-field"><label>Comments / Notes</label><textarea id="nt-comments" placeholder="Blockers, context, links…"></textarea></div>
@@ -1552,8 +1646,10 @@ function refreshCurrentView() {
   const active = document.querySelector('.view.active');
   if (!active) return;
   const id = active.id.replace('view-','');
-  if (id === 'dashboard') renderDashboard();
+  if (id === 'today')    renderTodayView();
+  else if (id === 'dashboard') renderDashboard();
   else if (id === 'weekly') renderWeekly();
+  else if (id === 'activity') renderActivityLog();
   else if (id.startsWith('area-')) renderArea(id.replace('area-',''));
 }
 
@@ -1597,10 +1693,10 @@ async function dbGetHistory(taskId) {
 
 // ─── Row converters ───────────────────────────────────────
 function taskToRow(t) {
-  return { id:t.id, area:t.area, description:t.desc, owner:t.owner, priority:t.priority, status:t.status, start_date:t.start||null, deadline:t.deadline||null, comments:t.comments||null, file_name:t.file||null, file_data:t.fileData||null, requested_by:t.requestedBy||null, blocked_by:t.blockedBy||null };
+  return { id:t.id, area:t.area, description:t.desc, owner:t.owner, priority:t.priority, status:t.status, start_date:t.start||null, deadline:t.deadline||null, due_time:t.dueTime||null, reminder_date:t.reminder||null, waiting_on:t.waitingOn||null, comments:t.comments||null, file_name:t.file||null, file_data:t.fileData||null, requested_by:t.requestedBy||null, blocked_by:t.blockedBy||null };
 }
 function rowToTask(r) {
-  return { id:r.id, area:r.area, desc:r.description, owner:r.owner, priority:r.priority, status:r.status, start:r.start_date||'', deadline:r.deadline||'', comments:r.comments||'', file:r.file_name||null, fileData:r.file_data||null, requestedBy:r.requested_by||'', blockedBy:r.blocked_by||'' };
+  return { id:r.id, area:r.area, desc:r.description, owner:r.owner, priority:r.priority, status:r.status, start:r.start_date||'', deadline:r.deadline||'', dueTime:r.due_time||'', reminder:r.reminder_date||'', waitingOn:r.waiting_on||'', comments:r.comments||'', file:r.file_name||null, fileData:r.file_data||null, requestedBy:r.requested_by||'', blockedBy:r.blocked_by||'' };
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1644,22 +1740,39 @@ function enterApp() {
   const landing = document.getElementById('landing');
   const app     = document.getElementById('app');
   landing.classList.add('hidden');
-  setTimeout(() => { landing.style.display='none'; app.classList.add('visible'); renderDashboard(); }, 480);
+  setTimeout(() => { landing.style.display='none'; app.classList.add('visible'); renderTodayView(); navigate('today',document.getElementById('nav-today')); }, 480);
 }
 
 // ═══════════════════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════════════════
 function urgency(deadline, status) {
-  if (status==="Completed") return { label:"✓ Done",      cls:"urgency-ok"      };
-  if (!deadline)            return { label:"—",           cls:""                };
-  if (deadline<TODAY)       return { label:"🔴 Overdue",  cls:"urgency-overdue" };
+  if (status==="Completed")  return { label:"✓ Done",        cls:"urgency-ok"      };
+  if (status==="Waiting on") return { label:"⏳ Waiting",     cls:"urgency-waiting" };
+  if (!deadline)             return { label:"—",             cls:""                };
+  if (deadline<TODAY)        return { label:"🔴 Overdue",    cls:"urgency-overdue" };
   const diff=(new Date(deadline)-new Date(TODAY))/86400000;
-  if (diff<=3)              return { label:"🟠 Due Soon", cls:"urgency-soon"    };
-  return                           { label:"🟢 On Track", cls:"urgency-ok"      };
+  if (diff<=3)               return { label:"🟠 Due Soon",   cls:"urgency-soon"    };
+  return                            { label:"🟢 On Track",   cls:"urgency-ok"      };
+}
+function daysChip(deadline, status) {
+  if (!deadline||status==="Completed") return "";
+  const diff=Math.ceil((new Date(deadline)-new Date(TODAY))/86400000);
+  if (diff<0)  return `<span class="days-chip overdue">${Math.abs(diff)}d overdue</span>`;
+  if (diff===0) return `<span class="days-chip soon">today</span>`;
+  if (diff<=3) return `<span class="days-chip soon">in ${diff}d</span>`;
+  if (diff<=14) return `<span class="days-chip ok">in ${diff}d</span>`;
+  return `<span class="days-chip far">in ${diff}d</span>`;
+}
+function ownerAvatar(owner) {
+  if (!owner) return "";
+  const colors=["#0c66e4","#1f845a","#c25100","#5e4db2","#ae2a19","#0e7490","#7f5f01"];
+  const initials=owner.split(" ").map(w=>w[0]||"").join("").toUpperCase().slice(0,2)||owner[0].toUpperCase();
+  const c=colors[owner.charCodeAt(0)%colors.length];
+  return `<span class="owner-avatar" style="background:${c}22;color:${c}">${initials}</span>`;
 }
 function statusBadge(s) {
-  const m={"Pending":"badge-pending","In Progress":"badge-progress","Completed":"badge-completed","Blocked":"badge-blocked"};
+  const m={"Pending":"badge-pending","In Progress":"badge-progress","Completed":"badge-completed","Blocked":"badge-blocked","Waiting on":"badge-waiting"};
   return `<span class="badge ${m[s]||''}">${s}</span>`;
 }
 function priorityBadge(p) {
@@ -1693,11 +1806,13 @@ function navigate(viewId, navEl) {
   const view=document.getElementById('view-'+viewId);
   if(view) view.classList.add('active');
   if(navEl) navEl.classList.add('active');
-  const labels={'dashboard':'Dashboard','new-task':'New Task','weekly':'Weekly Review','timeline':'Timeline','area-ACC':'Account','area-OPC':'Operations','area-FIN':'Finance','area-OPP':'Projects','area-HR':'HR'};
+  const labels={'today':'Today','dashboard':'Dashboard','new-task':'New Task','weekly':'Weekly Review','timeline':'Timeline','activity':'Activity Log','area-ACC':'Account','area-OPC':'Operations','area-FIN':'Finance','area-OPP':'Projects','area-HR':'HR'};
   document.getElementById('breadcrumb').textContent=labels[viewId]||viewId;
+  if(viewId==='today')         renderTodayView();
   if(viewId==='dashboard')     renderDashboard();
   if(viewId==='weekly')        renderWeekly();
   if(viewId==='timeline')      renderTimeline();
+  if(viewId==='activity')      renderActivityLog();
   if(viewId==='new-task')      loadTemplates(document.getElementById('nt-area').value);
   if(viewId.startsWith('area-')) renderArea(viewId.replace('area-',''));
 }
@@ -2267,11 +2382,14 @@ async function createTask() {
         comments=document.getElementById('nt-comments').value.trim(),
         requestedBy=document.getElementById('nt-requestedby').value.trim(),
         blockedBy=document.getElementById('nt-blockedby').value.trim(),
+        dueTime=document.getElementById('nt-duetime').value,
+        reminder=document.getElementById('nt-reminder').value,
+        waitingOn=document.getElementById('nt-waitingon').value.trim(),
         fileInput=document.getElementById('nt-file');
   if(!desc||!owner||!deadline){toast("Please fill in required fields: Description, Owner, Deadline.","error");return;}
   idCounters[area]++;
   const id=`${area}-${String(idCounters[area]).padStart(3,'0')}`;
-  const task={id,area,desc,owner,priority,status,start,deadline,comments,requestedBy,blockedBy,file:null,fileData:null};
+  const task={id,area,desc,owner,priority,status,start,deadline,dueTime,reminder,waitingOn,comments,requestedBy,blockedBy,file:null,fileData:null};
   if(fileInput._fileName){task.file=fileInput._fileName;task.fileData=fileInput._fileData;}
   const btn=document.getElementById('btnCreate');btn.disabled=true;btn.textContent='Saving…';setDbStatus('sync','Saving…');
   try {
@@ -2304,10 +2422,13 @@ async function openEditModal(id) {
       <div class="form-field"><label>Requested By</label><input type="text" id="ed-requestedby" value="${escAttr(t.requestedBy||'')}"/></div>
       <div class="form-field"><label>Area</label><select id="ed-area">${Object.entries(AREAS).map(([c,a])=>`<option value="${c}" ${t.area===c?'selected':''}>${a.name}</option>`).join('')}</select></div>
       <div class="form-field"><label>Priority</label><select id="ed-priority">${['Critical','High','Medium','Low'].map(p=>`<option value="${p}" ${t.priority===p?'selected':''}>${p}</option>`).join('')}</select></div>
-      <div class="form-field"><label>Status</label><select id="ed-status">${['Pending','In Progress','Completed','Blocked'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="form-field"><label>Status</label><select id="ed-status">${['Pending','In Progress','Completed','Blocked','Waiting on'].map(s=>`<option value="${s}" ${t.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
       <div class="form-field"><label>Blocked By (Task ID)</label><input type="text" id="ed-blockedby" value="${escAttr(t.blockedBy||'')}" placeholder="e.g. FIN-003"/></div>
       <div class="form-field"><label>Start Date</label><input type="date" id="ed-start" value="${t.start}"/></div>
       <div class="form-field"><label>Deadline</label><input type="date" id="ed-deadline" value="${t.deadline}"/></div>
+      <div class="form-field"><label>Due Time</label><input type="time" id="ed-duetime" value="${t.dueTime||''}"/></div>
+      <div class="form-field"><label>Remind Me On</label><input type="date" id="ed-reminder" value="${t.reminder||''}"/></div>
+      <div class="form-field"><label>Waiting On</label><input type="text" id="ed-waitingon" value="${escAttr(t.waitingOn||'')}" placeholder="Person / entity"/></div>
     </div>
     <div class="form-grid full"><div class="form-field"><label>Comments</label><textarea id="ed-comments">${escHtml(t.comments||'')}</textarea></div></div>
     <div class="form-grid full"><div class="form-field">
@@ -2354,6 +2475,9 @@ async function saveEdit(id) {
   t.desc=document.getElementById('ed-desc').value.trim();t.owner=document.getElementById('ed-owner').value.trim();t.area=document.getElementById('ed-area').value;t.priority=document.getElementById('ed-priority').value;t.status=document.getElementById('ed-status').value;t.start=document.getElementById('ed-start').value;t.deadline=document.getElementById('ed-deadline').value;t.comments=document.getElementById('ed-comments').value.trim();
   t.requestedBy=(document.getElementById('ed-requestedby')?.value||'').trim();
   t.blockedBy=(document.getElementById('ed-blockedby')?.value||'').trim();
+  t.dueTime=(document.getElementById('ed-duetime')?.value||'');
+  t.reminder=(document.getElementById('ed-reminder')?.value||'');
+  t.waitingOn=(document.getElementById('ed-waitingon')?.value||'').trim();
   const edFile=document.getElementById('ed-file');if(edFile&&edFile._fileName){t.file=edFile._fileName;t.fileData=edFile._fileData;}
   const btn=document.getElementById('btnSaveEdit');btn.disabled=true;btn.textContent='Saving…';setDbStatus('sync','Saving…');
   try {
@@ -2390,7 +2514,18 @@ function toast(msg,type="success") {
 // ═══════════════════════════════════════════════════════════
 // NAV BADGES
 // ═══════════════════════════════════════════════════════════
-function updateNavBadges() { Object.keys(AREAS).forEach(code=>{document.getElementById(`badge-${code}`).textContent=tasks.filter(t=>t.area===code).length;}); }
+function updateNavBadges() {
+  Object.keys(AREAS).forEach(code=>{
+    document.getElementById(`badge-${code}`).textContent=tasks.filter(t=>t.area===code).length;
+    const hasOverdue=tasks.some(t=>t.area===code&&t.deadline&&t.deadline<TODAY&&t.status!=='Completed'&&t.status!=='Waiting on');
+    const hasBlocked=tasks.some(t=>t.area===code&&t.status==='Blocked');
+    const hasSoon=tasks.some(t=>t.area===code&&t.deadline&&t.deadline>=TODAY&&Math.ceil((new Date(t.deadline)-new Date(TODAY))/86400000)<=3&&t.status!=='Completed');
+    const dot=document.getElementById(`udot-${code}`);
+    if(dot){dot.className='urgency-dot';if(hasOverdue||hasBlocked)dot.classList.add('red');else if(hasSoon)dot.classList.add('orange');}
+  });
+  const todayCount=tasks.filter(t=>t.deadline===TODAY&&t.status!=='Completed').length+tasks.filter(t=>t.deadline&&t.deadline<TODAY&&t.status!=='Completed').length;
+  const tb=document.getElementById('badge-today');if(tb){tb.textContent=todayCount;tb.style.display=todayCount?'':'none';}
+}
 
 // ═══════════════════════════════════════════════════════════
 // MEJORA 1 — Owner selector poblado desde Supabase Auth
@@ -2869,6 +3004,131 @@ function copyReport() {
   if (!el?.value) { toast('Generate the report first.','error'); return; }
   navigator.clipboard.writeText(el.value).then(()=>toast('Report copied to clipboard.','success')).catch(()=>{el.select();document.execCommand('copy');toast('Report copied.','success');});
 }
+
+
+// ═══════════════════════════════════════════════════════════
+// TODAY VIEW
+// ═══════════════════════════════════════════════════════════
+function renderTodayView() {
+  const el = document.getElementById('view-today');
+  if (!el) return;
+  const now = new Date();
+  const dayName = now.toLocaleDateString('en-US',{weekday:'long'});
+  const dateStr = now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+  const overdue  = tasks.filter(t=>t.deadline&&t.deadline<TODAY&&t.status!=='Completed');
+  const dueToday = tasks.filter(t=>t.deadline===TODAY&&t.status!=='Completed');
+  const waiting  = tasks.filter(t=>t.status==='Waiting on');
+  const remToday = tasks.filter(t=>t.reminder===TODAY&&t.status!=='Completed'&&!dueToday.find(x=>x.id===t.id));
+
+  if (!overdue.length && !dueToday.length && !waiting.length && !remToday.length) {
+    el.innerHTML=`<div class="today-hero"><div><div class="today-date-block">${dayName.toUpperCase()}</div><div class="today-title">${dateStr}</div></div></div><div class="today-empty">🟢 All clear — no tasks require your attention today.</div>`;
+    return;
+  }
+
+  function todayRow(t, cls='') {
+    const timeChip = t.dueTime ? `<span class="today-time-chip ${cls}">${t.dueTime}</span>` : '';
+    const waitChip = t.waitingOn ? `<span class="waiting-chip">⏳ ${escHtml(t.waitingOn)}</span>` : '';
+    return `<div class="today-row ${cls}">
+      <div class="today-row-desc">${escHtml(t.desc)}</div>
+      <div class="today-row-meta">
+        ${areaBadge(t.area)} ${ownerAvatar(t.owner)}<span style="font-size:12px;color:var(--muted)">${escHtml(t.owner)}</span>
+        ${timeChip}${waitChip}${statusBadge(t.status)}
+        <span class="id-chip">${t.id}</span>
+        <button class="btn btn-ghost" style="padding:3px 9px;font-size:11px" onclick="openEditModal('${t.id}')">Edit</button>
+      </div>
+    </div>`;
+  }
+
+  let out = `<div class="today-hero"><div><div class="today-date-block">${dayName.toUpperCase()}</div><div class="today-title">${dateStr}</div></div><div style="margin-left:auto;display:flex;gap:8px">`;
+  if(overdue.length)  out += `<span class="badge badge-blocked">🔴 ${overdue.length} overdue</span>`;
+  if(dueToday.length) out += `<span class="badge badge-high">🟠 ${dueToday.length} due today</span>`;
+  if(waiting.length)  out += `<span class="badge badge-waiting">⏳ ${waiting.length} waiting</span>`;
+  out += `</div></div>`;
+
+  if(overdue.length) {
+    out += `<div class="today-section"><div class="today-section-label">🔴 Overdue (${overdue.length})</div>`;
+    out += overdue.sort((a,b)=>a.deadline.localeCompare(b.deadline)).map(t=>todayRow(t,'overdue')).join('');
+    out += `</div>`;
+  }
+  if(dueToday.length) {
+    out += `<div class="today-section"><div class="today-section-label">🟠 Due Today (${dueToday.length})</div>`;
+    out += dueToday.sort((a,b)=>(a.dueTime||'99').localeCompare(b.dueTime||'99')).map(t=>todayRow(t,'due-today')).join('');
+    out += `</div>`;
+  }
+  if(remToday.length) {
+    out += `<div class="today-section"><div class="today-section-label">🔔 Reminders Today (${remToday.length})</div>`;
+    out += remToday.map(t=>todayRow(t,'')).join('');
+    out += `</div>`;
+  }
+  if(waiting.length) {
+    out += `<div class="today-section"><div class="today-section-label">⏳ Waiting On (${waiting.length})</div>`;
+    out += waiting.map(t=>todayRow(t,'waiting')).join('');
+    out += `</div>`;
+  }
+  el.innerHTML = out;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ACTIVITY LOG (global)
+// ═══════════════════════════════════════════════════════════
+let _activityCache = [];
+
+async function renderActivityLog() {
+  const el = document.getElementById('view-activity');
+  if (!el) return;
+  el.innerHTML = `<div class="activity-header"><div class="area-page-name">Activity Log</div><div class="area-page-code" style="margin-left:auto">All changes across all areas</div></div><div class="activity-log" id="activityFeed"><div class="history-empty">Loading…</div></div>`;
+
+  try {
+    const res = await fetch(`${API_BASE}/task_history?order=created_at.desc&limit=80`, { headers:{...HEADERS,'Prefer':''} });
+    if (!res.ok) throw new Error();
+    const rows = await res.json();
+    _activityCache = rows;
+    const feed = document.getElementById('activityFeed');
+    if (!rows.length) { feed.innerHTML = '<div class="history-empty">No activity recorded yet.</div>'; return; }
+    feed.innerHTML = rows.map(h => {
+      const t = tasks.find(x=>x.id===h.task_id);
+      const areaInfo = t ? AREAS[t.area] : null;
+      let text = '';
+      if (h.action==='created') text = `<strong>${escHtml(h.changed_by)}</strong> created task <strong>${h.task_id}</strong>${t?' — '+escHtml(t.desc.slice(0,60)):''}`;
+      else if (h.action==='deleted') text = `<strong>${escHtml(h.changed_by)}</strong> deleted task <strong>${h.task_id}</strong>`;
+      else { const from=h.old_value?`<em>${escHtml(h.old_value)}</em>`:'—',to=h.new_value?`<em>${escHtml(h.new_value)}</em>`:'—'; text=`<strong>${escHtml(h.changed_by)}</strong> changed <strong>${h.field||'field'}</strong> of <strong>${h.task_id}</strong> from ${from} → ${to}`; }
+      const areaTag = areaInfo ? `<span class="badge ${areaInfo.badge}" style="font-size:9px;padding:1px 6px">${areaInfo.name}</span>` : '';
+      return `<div class="activity-item ${h.action}"><span class="ai-time">${fmtTime(h.created_at)}</span><span class="ai-text">${areaTag} ${text}</span></div>`;
+    }).join('');
+  } catch(e) {
+    const feed = document.getElementById('activityFeed');
+    if(feed) feed.innerHTML = '<div class="history-empty">Could not load activity. Check connection.</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMPACT MODE TOGGLE
+// ═══════════════════════════════════════════════════════════
+function toggleCompact(on) {
+  document.getElementById('content')?.classList.toggle('compact-mode', on);
+  document.querySelector('.content')?.classList.toggle('compact-mode', on);
+}
+
+// ═══════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement?.tagName;
+  if (['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
+  if (e.key === 'n' || e.key === 'N') {
+    navigate('new-task', null);
+    document.querySelectorAll('.nav-item')[2]?.classList.add('active');
+  }
+  if (e.key === '/') {
+    e.preventDefault();
+    navigate('dashboard', null);
+    setTimeout(() => document.getElementById('searchInput')?.focus(), 100);
+  }
+  if (e.key === 't' || e.key === 'T') {
+    navigate('today', document.getElementById('nav-today'));
+  }
+});
 
 // ═══════════════════════════════════════════════════════════
 // INIT
