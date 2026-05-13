@@ -1815,6 +1815,7 @@ async function navigate(viewId, navEl) {
   if(navEl) navEl.classList.add('active');
   const labels={'today':'Today','dashboard':'Dashboard','new-task':'New Task','weekly':'Weekly Review','timeline':'Timeline','activity':'Activity Log','area-ACC':'Account','area-OPC':'Operations','area-FIN':'Finance','area-OPP':'Projects','area-HR':'HR'};
   document.getElementById('breadcrumb').textContent=labels[viewId]||viewId;
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 // ═══════════════════════════════════════════════════════════
