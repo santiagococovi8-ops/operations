@@ -238,9 +238,9 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
 .btn-danger:hover { background:var(--red-bg); }
 .btn:disabled { opacity:.5; cursor:not-allowed; transform:none!important; }
 
-.content { flex:1; padding:28px; overflow-x:hidden; }
+.content { flex:1; padding:0; overflow-x:hidden; }
 .view { display:none; }
-.view.active { display:block; animation:fadeSlide .22s ease; }
+.view.active { display:block; animation:fadeSlide .22s ease; padding:28px; }
 @keyframes fadeSlide { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
 /* ═══════════════════════════════════════════════════════════
@@ -686,7 +686,8 @@ input[type="checkbox"].row-cb {
   .topbar-actions .btn span { display: none; }
 
   /* Content con padding bottom para la bottom nav */
-  .content { padding: 14px 14px 80px; }
+  .content { padding: 0; }
+  .view.active { padding: 14px 14px 80px; }
 
 
   /* KPIs — 3 primeros en fila, 2 últimos centrados */
@@ -1657,17 +1658,17 @@ async function dbGetTasks() {
   return res.json();
 }
 async function dbInsertTask(task) {
-  const res = await fetch(`${API_BASE}/tasks`, { method:'POST', headers:HEADERS, body:JSON.stringify(taskToRow(task)) });
+  const res = await fetch(`${API_BASE}/tasks`, { method:'POST', headers:authHeaders({'Prefer':'return=representation'}), body:JSON.stringify(taskToRow(task)) });
   if (!res.ok) throw new Error(`INSERT failed: ${res.status}`);
   return (await res.json())[0];
 }
 async function dbUpdateTask(task) {
-  const res = await fetch(`${API_BASE}/tasks?id=eq.${encodeURIComponent(task.id)}`, { method:'PATCH', headers:HEADERS, body:JSON.stringify(taskToRow(task)) });
+  const res = await fetch(`${API_BASE}/tasks?id=eq.${encodeURIComponent(task.id)}`, { method:'PATCH', headers:authHeaders({'Prefer':'return=representation'}), body:JSON.stringify(taskToRow(task)) });
   if (!res.ok) throw new Error(`UPDATE failed: ${res.status}`);
   return (await res.json())[0];
 }
 async function dbDeleteTask(id) {
-  const res = await fetch(`${API_BASE}/tasks?id=eq.${encodeURIComponent(id)}`, { method:'DELETE', headers:{...HEADERS,'Prefer':''} });
+  const res = await fetch(`${API_BASE}/tasks?id=eq.${encodeURIComponent(id)}`, { method:'DELETE', headers:authHeaders({'Prefer':''}) });
   if (!res.ok) throw new Error(`DELETE failed: ${res.status}`);
 }
 
@@ -1675,7 +1676,7 @@ async function dbDeleteTask(id) {
 async function dbLogHistory(taskId, action, changedBy, field=null, oldVal=null, newVal=null) {
   try {
     await fetch(`${API_BASE}/task_history`, {
-      method:'POST', headers:HEADERS,
+      method:'POST', headers:authHeaders(),
       body:JSON.stringify({ task_id:taskId, action, field, old_value:oldVal, new_value:newVal, changed_by:changedBy })
     });
   } catch(e) { console.warn('History log failed:', e); }
@@ -2664,7 +2665,7 @@ async function dbSaveNote(areaCode, text) {
     // Upsert en tabla weekly_notes (la creamos abajo)
     await fetch(`${API_BASE}/weekly_notes`, {
       method: 'POST',
-      headers: { ...HEADERS, 'Prefer': 'resolution=merge-duplicates,return=representation' },
+      headers: { ...authHeaders(), 'Prefer': 'resolution=merge-duplicates,return=representation' },
       body: JSON.stringify({ area_code: areaCode, note: text, updated_at: new Date().toISOString() })
     });
   } catch(e) { console.warn('Note save failed:', e); }
