@@ -238,7 +238,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
 .btn-danger:hover { background:var(--red-bg); }
 .btn:disabled { opacity:.5; cursor:not-allowed; transform:none!important; }
 
-.content { flex:1; padding:0; overflow-x:hidden; }
+.content { flex:1; min-height: calc(100vh - 56px); padding:0; overflow-x:hidden; }
 .view { display:none; }
 .view.active { display:block; animation:fadeSlide .22s ease; padding:28px; }
 @keyframes fadeSlide { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
@@ -686,7 +686,7 @@ input[type="checkbox"].row-cb {
   .topbar-actions .btn span { display: none; }
 
   /* Content con padding bottom para la bottom nav */
-  .content { padding: 0; }
+  .content { padding: 0; min-height: calc(100vh - 52px); }
   .view.active { padding: 14px 14px 80px; }
 
 
@@ -1664,7 +1664,7 @@ async function dbInsertTask(task) {
 }
 async function dbUpdateTask(task) {
   const res = await fetch(`${API_BASE}/tasks?id=eq.${encodeURIComponent(task.id)}`, { method:'PATCH', headers:authHeaders({'Prefer':'return=representation'}), body:JSON.stringify(taskToRow(task)) });
-  if (!res.ok) throw new Error(`UPDATE failed: ${res.status}`);
+  if (!res.ok) { const body = await res.text(); console.error('UPDATE failed', res.status, body, 'session:', supabaseSession ? 'present' : 'NULL'); throw new Error(`UPDATE failed: ${res.status} - ${body}`); }
   return (await res.json())[0];
 }
 async function dbDeleteTask(id) {
