@@ -220,7 +220,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); min-
 /* ═══════════════════════════════════════════════════════════
    MAIN
 ═══════════════════════════════════════════════════════════ */
-.main { flex:1; min-width:0; display:flex; flex-direction:column; height:100vh; overflow-y:auto; }
+.main { flex:1; min-width:0; display:flex; flex-direction:column; }
 .topbar { height:56px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; padding:0 24px; position:sticky; top:0; z-index:100; }
 .topbar-title { font-family:var(--mono); font-size:11px; font-weight:500; color:var(--subtle); letter-spacing:.08em; }
 .topbar-breadcrumb { font-size:12px; color:var(--muted); }
@@ -1815,7 +1815,7 @@ async function navigate(viewId, navEl) {
   if(navEl) navEl.classList.add('active');
   const labels={'today':'Today','dashboard':'Dashboard','new-task':'New Task','weekly':'Weekly Review','timeline':'Timeline','activity':'Activity Log','area-ACC':'Account','area-OPC':'Operations','area-FIN':'Finance','area-OPP':'Projects','area-HR':'HR'};
   document.getElementById('breadcrumb').textContent=labels[viewId]||viewId;
-  document.querySelector('.main').scrollTo(0, 0);
+  window.scrollTo(0, 0);
 }
 
 // ═══════════════════════════════════════════════════════════
