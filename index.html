@@ -1798,7 +1798,16 @@ function fmtTime(iso) {
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════
-function navigate(viewId, navEl) {
+async function navigate(viewId, navEl) {
+  // Render content FIRST into the hidden div to avoid empty-padding flash
+  if(viewId==='today')                renderTodayView();
+  else if(viewId==='dashboard')       renderDashboard();
+  else if(viewId==='weekly')          await renderWeekly();
+  else if(viewId==='timeline')        renderTimeline();
+  else if(viewId==='activity')        await renderActivityLog();
+  else if(viewId==='new-task')        loadTemplates(document.getElementById('nt-area').value);
+  else if(viewId.startsWith('area-')) renderArea(viewId.replace('area-',''));
+  // Then swap visibility — content is already populated
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const view=document.getElementById('view-'+viewId);
@@ -1806,13 +1815,6 @@ function navigate(viewId, navEl) {
   if(navEl) navEl.classList.add('active');
   const labels={'today':'Today','dashboard':'Dashboard','new-task':'New Task','weekly':'Weekly Review','timeline':'Timeline','activity':'Activity Log','area-ACC':'Account','area-OPC':'Operations','area-FIN':'Finance','area-OPP':'Projects','area-HR':'HR'};
   document.getElementById('breadcrumb').textContent=labels[viewId]||viewId;
-  if(viewId==='today')         renderTodayView();
-  if(viewId==='dashboard')     renderDashboard();
-  if(viewId==='weekly')        renderWeekly();
-  if(viewId==='timeline')      renderTimeline();
-  if(viewId==='activity')      renderActivityLog();
-  if(viewId==='new-task')      loadTemplates(document.getElementById('nt-area').value);
-  if(viewId.startsWith('area-')) renderArea(viewId.replace('area-',''));
 }
 
 // ═══════════════════════════════════════════════════════════
