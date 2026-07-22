@@ -3713,6 +3713,9 @@ window.addEventListener('load', async () => {
         supabaseSession = token;
         applyUserUI(name);
         document.getElementById('loginScreen').style.display = 'none';
+        // Sesión válida: ocultar landing y entrar directo a la app
+        document.getElementById('landing').style.display = 'none';
+        document.getElementById('app').classList.add('visible');
       } else {
         // Token expirado — limpiar y mostrar login
         sessionStorage.removeItem('oa_session');
@@ -3736,6 +3739,10 @@ window.addEventListener('load', async () => {
     loadTeamMembers();
     // Cargar templates por área por defecto (ACC)
     loadTemplates('ACC');
+    // Si ya estamos en la app (entrada directa por refresh), renderizar Today
+    if (document.getElementById('app').classList.contains('visible')) {
+      navigate('today', document.getElementById('nav-today'));
+    }
   } catch(e) {
     console.error('Failed to load tasks from Supabase:',e);
     setDbStatus('err','Connection error');
