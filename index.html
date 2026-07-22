@@ -2242,7 +2242,7 @@ function refreshCurrentView() {
 
 // ─── DB helpers ───────────────────────────────────────────
 async function dbGetTasks() {
-  const res = await fetch(`${API_BASE}/tasks?order=created_at.asc`, { headers:{...HEADERS,'Prefer':''} });
+  const res = await fetch(`${API_BASE}/tasks?order=created_at.asc`, { headers:authHeaders({'Prefer':''}) });
   if (!res.ok) throw new Error(`GET tasks failed: ${res.status}`);
   return res.json();
 }
@@ -2272,7 +2272,7 @@ async function dbLogHistory(taskId, action, changedBy, field=null, oldVal=null, 
 }
 async function dbGetHistory(taskId) {
   try {
-    const res = await fetch(`${API_BASE}/task_history?task_id=eq.${encodeURIComponent(taskId)}&order=created_at.desc&limit=20`, { headers:{...HEADERS,'Prefer':''} });
+    const res = await fetch(`${API_BASE}/task_history?task_id=eq.${encodeURIComponent(taskId)}&order=created_at.desc&limit=20`, { headers:authHeaders({'Prefer':''}) });
     if (!res.ok) return [];
     return res.json();
   } catch(_) { return []; }
@@ -3643,7 +3643,7 @@ async function renderActivityLog() {
   el.innerHTML = `<div class="activity-header"><div class="area-page-name">Activity Log</div><div class="area-page-code" style="margin-left:auto">All changes across all areas</div></div><div class="activity-log" id="activityFeed"><div class="history-empty">Loading…</div></div>`;
 
   try {
-    const res = await fetch(`${API_BASE}/task_history?order=created_at.desc&limit=80`, { headers:{...HEADERS,'Prefer':''} });
+    const res = await fetch(`${API_BASE}/task_history?order=created_at.desc&limit=80`, { headers:authHeaders({'Prefer':''}) });
     if (!res.ok) throw new Error();
     const rows = await res.json();
     _activityCache = rows;
