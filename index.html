@@ -692,6 +692,9 @@ tbody tr:hover { background: rgba(67,97,238,.025) !important; }
 .badge-critical  { background: var(--red-bg);         color: var(--red);     border-color: rgba(220,38,38,.18); font-weight: 700; }
 .badge-medium    { background: var(--orange-bg);      color: var(--orange);  border-color: rgba(217,119,6,.18); }
 .badge-low       { background: var(--green-bg);       color: var(--green);   border-color: rgba(5,150,105,.18); }
+/* Fallback for any dynamic area code not explicitly listed */
+[class*="badge-area-"] { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-mid); }
+/* Known area codes keep their specific styles */
 .badge-area-acc  { background: var(--blue-bg);        color: var(--blue);    border-color: rgba(37,99,235,.18); }
 .badge-area-opc  { background: var(--green-bg);       color: var(--green);   border-color: rgba(5,150,105,.18); }
 .badge-area-fin  { background: var(--accent-bg);      color: var(--accent);  border-color: var(--accent-mid); }
@@ -847,7 +850,7 @@ select option { background: var(--surface); color: var(--text); }
 /* ═══════════════════════════════════════════════════════════
    AREA PAGE HEADER
 ═══════════════════════════════════════════════════════════ */
-#view-area-ACC, #view-area-OPC, #view-area-FIN, #view-area-OPP, #view-area-HR { padding-top: 0; margin-top: 0; }
+[id^="view-area-"] { padding-top: 0; margin-top: 0; }
 .area-page-header {
   display: flex; align-items: center; gap: 13px;
   margin-bottom: 20px; padding-bottom: 17px;
@@ -1641,25 +1644,13 @@ input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px;
       </div>
       <div class="nav-section" style="margin-top:16px;">
         <div class="nav-label">Areas</div>
-        <div class="nav-item" onclick="navigate('area-ACC',this)" id="nav-ACC">
-          <span class="dot" style="background:var(--accent)"></span>Account
-          <span class="urgency-dot" id="udot-ACC"></span><span class="badge" id="badge-ACC">0</span>
-        </div>
-        <div class="nav-item" onclick="navigate('area-OPC',this)" id="nav-OPC">
-          <span class="dot" style="background:var(--green)"></span>Operations
-          <span class="urgency-dot" id="udot-OPC"></span><span class="badge" id="badge-OPC">0</span>
-        </div>
-        <div class="nav-item" onclick="navigate('area-FIN',this)" id="nav-FIN">
-          <span class="dot" style="background:var(--orange)"></span>Finance
-          <span class="urgency-dot" id="udot-FIN"></span><span class="badge" id="badge-FIN">0</span>
-        </div>
-        <div class="nav-item" onclick="navigate('area-OPP',this)" id="nav-OPP">
-          <span class="dot" style="background:var(--purple)"></span>Projects
-          <span class="urgency-dot" id="udot-OPP"></span><span class="badge" id="badge-OPP">0</span>
-        </div>
-        <div class="nav-item" onclick="navigate('area-HR',this)" id="nav-HR">
-          <span class="dot" style="background:var(--red)"></span>HR
-          <span class="urgency-dot" id="udot-HR"></span><span class="badge" id="badge-HR">0</span>
+        <div id="navAreaItems"></div>
+      </div>
+      <div class="nav-section" style="margin-top:16px;">
+        <div class="nav-label">Admin</div>
+        <div class="nav-item" onclick="navigate('admin',this)" id="nav-admin">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0;opacity:.6"><rect x="1" y="1" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="7.5" y="1" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="7.5" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="7.5" y="7.5" width="4.5" height="4.5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+          Manage Areas
         </div>
       </div>
     </nav>
@@ -1779,8 +1770,6 @@ input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px;
           <div class="filters-bar">
             <select class="filter-select" id="filterArea" onchange="onFilterChange()">
               <option value="">All Areas</option>
-              <option value="ACC">Account</option><option value="OPC">Operations</option>
-              <option value="FIN">Finance</option><option value="OPP">Projects</option><option value="HR">HR</option>
             </select>
             <select class="filter-select" id="filterStatus" onchange="onFilterChange()">
               <option value="">All Statuses</option>
@@ -1840,8 +1829,6 @@ input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px;
           <div class="form-grid">
             <div class="form-field"><label>Area *</label>
               <select id="nt-area" onchange="loadTemplates(this.value)">
-                <option value="ACC">Account</option><option value="OPC">Operations</option>
-                <option value="FIN">Finance</option><option value="OPP">Projects</option><option value="HR">HR</option>
               </select>
             </div>
             <div class="form-field"><label>Owner *</label>
@@ -1925,18 +1912,14 @@ input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px;
           <button class="btn btn-ghost" style="margin-left:auto" onclick="tlGoToday()">Today</button>
         </div>
         <div id="tlContainer"></div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
-          ${Object.entries({ACC:'#2563eb',OPC:'#16a34a',FIN:'#4f6ef7',OPP:'#7c3aed',HR:'#dc2626'}).map(([k,c])=>`<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:8px;height:8px;border-radius:2px;background:${c};display:inline-block"></span>${k}</span>`).join('')}
-          <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-left:8px"><span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block"></span>Overdue</span>
-        </div>
+        <div id="tlLegend" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px"></div>
       </div>
 
-      <!-- AREA VIEWS -->
-      <div class="view" id="view-area-ACC"></div>
-      <div class="view" id="view-area-OPC"></div>
-      <div class="view" id="view-area-FIN"></div>
-      <div class="view" id="view-area-OPP"></div>
-      <div class="view" id="view-area-HR"></div>
+      <!-- AREA VIEWS — generated dynamically by buildAreaViews() -->
+      <div id="dynamicAreaViews"></div>
+
+      <!-- ADMIN VIEW -->
+      <div class="view" id="view-admin"></div>
 
     </div>
   </div>
@@ -1994,11 +1977,6 @@ input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px;
           <label>Area</label>
           <select id="mob-filterArea" onchange="syncMobFilters()">
             <option value="">All Areas</option>
-            <option value="ACC">Account</option>
-            <option value="OPC">Operations</option>
-            <option value="FIN">Finance</option>
-            <option value="OPP">Projects</option>
-            <option value="HR">HR</option>
           </select>
         </div>
         <div class="form-field">
@@ -2299,24 +2277,126 @@ function setDbStatus(state, text) {
 // ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
-const AREAS = {
-  ACC: { name:"Account",    hex:"#2563eb", badge:"badge-area-acc" },
-  OPC: { name:"Operations", hex:"#16a34a", badge:"badge-area-opc" },
-  FIN: { name:"Finance",    hex:"#4f6ef7", badge:"badge-area-fin" },
-  OPP: { name:"Projects",   hex:"#7c3aed", badge:"badge-area-opp" },
-  HR:  { name:"HR",         hex:"#dc2626", badge:"badge-area-hr"  },
-};
+// AREAS — populated dynamically from Supabase. Never hardcoded.
+let AREAS = {};
 let tasks = [];
 const TODAY = new Date().toISOString().slice(0,10);
-let idCounters = { ACC:0, OPC:0, FIN:0, OPP:0, HR:0 };
+let idCounters = {};
 let chartStatusInst = null;
 let chartAreaInst   = null;
 
+// ── Area color palette (cycles for new areas) ──
+const AREA_PALETTE = [
+  '#2563eb','#16a34a','#4361ee','#7c3aed','#dc2626',
+  '#d97706','#0891b2','#be185d','#15803d','#b45309'
+];
+function areaHexForCode(code) {
+  const keys = Object.keys(AREAS);
+  const idx  = keys.indexOf(code);
+  return AREA_PALETTE[idx % AREA_PALETTE.length];
+}
+
+// ── Load areas from Supabase ──
+async function loadAreas() {
+  try {
+    const res = await fetch(`${API_BASE}/areas?order=sort_order.asc,name.asc&active=eq.true`, {
+      headers: authHeaders({'Prefer':''})
+    });
+    if (!res.ok) throw new Error('areas fetch failed');
+    const rows = await res.json();
+    AREAS = {};
+    rows.forEach((a, i) => {
+      const hex = a.hex || AREA_PALETTE[i % AREA_PALETTE.length];
+      AREAS[a.code] = { name: a.name, hex, badge: `badge-area-${a.code.toLowerCase()}`, id: a.id };
+    });
+  } catch(e) {
+    console.warn('Could not load areas from Supabase, using defaults:', e);
+    // Fallback to original defaults so app is never broken
+    AREAS = {
+      ACC: { name:'Account',    hex:'#2563eb', badge:'badge-area-acc' },
+      OPC: { name:'Operations', hex:'#16a34a', badge:'badge-area-opc' },
+      FIN: { name:'Finance',    hex:'#4361ee', badge:'badge-area-fin' },
+      OPP: { name:'Projects',   hex:'#7c3aed', badge:'badge-area-opp' },
+      HR:  { name:'HR',         hex:'#dc2626', badge:'badge-area-hr'  },
+    };
+  }
+  applyDynamicAreas();
+}
+
+// ── Rebuild everything that depends on AREAS after a change ──
+function applyDynamicAreas() {
+  rebuildCounters();
+  buildAreaNavItems();
+  buildAreaViews();
+  populateAreaSelects();
+  buildTimelineLegend();
+}
+
+// ── Sidebar nav: Areas section ──
+function buildAreaNavItems() {
+  const container = document.getElementById('navAreaItems');
+  if (!container) return;
+  container.innerHTML = Object.entries(AREAS).map(([code, a]) =>
+    `<div class="nav-item" onclick="navigate('area-${code}',this)" id="nav-${code}">
+       <span class="dot" style="background:${a.hex}"></span>${escHtml(a.name)}
+       <span class="urgency-dot" id="udot-${code}"></span>
+       <span class="badge" id="badge-${code}">0</span>
+     </div>`
+  ).join('');
+}
+
+// ── Area view divs (injected into #dynamicAreaViews) ──
+function buildAreaViews() {
+  const container = document.getElementById('dynamicAreaViews');
+  if (!container) return;
+  container.innerHTML = Object.keys(AREAS).map(code =>
+    `<div class="view" id="view-area-${code}"></div>`
+  ).join('');
+}
+
+// ── Populate all area <select> elements ──
+function populateAreaSelects() {
+  const areaOpts = Object.entries(AREAS)
+    .map(([c, a]) => `<option value="${c}">${escHtml(a.name)}</option>`).join('');
+  const allOpts  = `<option value="">All Areas</option>` + areaOpts;
+
+  const ids = ['filterArea','mob-filterArea'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cur = el.value;
+    el.innerHTML = allOpts;
+    if (cur) el.value = cur;
+  });
+
+  const ntArea = document.getElementById('nt-area');
+  if (ntArea) { ntArea.innerHTML = areaOpts; }
+}
+
+// ── Timeline legend ──
+function buildTimelineLegend() {
+  const el = document.getElementById('tlLegend');
+  if (!el) return;
+  el.innerHTML = Object.entries(AREAS).map(([code, a]) =>
+    `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)">
+       <span style="width:8px;height:8px;border-radius:2px;background:${a.hex};display:inline-block"></span>${code}
+     </span>`
+  ).join('') +
+  `<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-left:8px">
+     <span style="width:10px;height:10px;border-radius:50%;background:var(--red);display:inline-block"></span>Overdue
+   </span>`;
+}
+
 function rebuildCounters() {
-  idCounters = { ACC:0, OPC:0, FIN:0, OPP:0, HR:0 };
+  idCounters = {};
+  Object.keys(AREAS).forEach(c => { idCounters[c] = 0; });
   tasks.forEach(t => {
     const p = t.id.split('-');
-    if (p.length===2 && idCounters[p[0]]!==undefined) { const n=parseInt(p[1],10); if(n>idCounters[p[0]]) idCounters[p[0]]=n; }
+    if (p.length === 2) {
+      if (idCounters[p[0]] === undefined) idCounters[p[0]] = 0;
+      const n = parseInt(p[1], 10);
+      if (n > idCounters[p[0]]) idCounters[p[0]] = n;
+    }
   });
 }
 
@@ -2366,7 +2446,13 @@ function priorityBadge(p) {
   const m={"Critical":"badge-critical","High":"badge-high","Medium":"badge-medium","Low":"badge-low"};
   return `<span class="badge ${m[p]||''}">${p}</span>`;
 }
-function areaBadge(code) { return `<span class="badge ${AREAS[code].badge}">${AREAS[code].name}</span>`; }
+function areaBadge(code) {
+  const a = AREAS[code];
+  if (!a) return `<span class="badge badge-pending">${escHtml(code)}</span>`;
+  const hex = a.hex || '#4361ee';
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `<span class="badge" style="background:rgba(${r},${g},${b},.09);color:${hex};border:1px solid rgba(${r},${g},${b},.22)">${escHtml(a.name)}</span>`;
+}
 function getOwners() { return [...new Set(tasks.map(t=>t.owner))].sort(); }
 function fileIcon(name) {
   if (!name) return '—';
@@ -2395,6 +2481,7 @@ async function navigate(viewId, navEl) {
   else if(viewId==='timeline')        renderTimeline();
   else if(viewId==='activity')        await renderActivityLog();
   else if(viewId==='new-task')        loadTemplates(document.getElementById('nt-area').value);
+  else if(viewId==='admin')           renderAdminAreas();
   else if(viewId.startsWith('area-')) renderArea(viewId.replace('area-',''));
   // Then swap visibility — content is already populated
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -2402,7 +2489,9 @@ async function navigate(viewId, navEl) {
   const view=document.getElementById('view-'+viewId);
   if(view) view.classList.add('active');
   if(navEl) navEl.classList.add('active');
-  const labels={'today':'Today','dashboard':'Dashboard','new-task':'New Task','weekly':'Weekly Review','timeline':'Timeline','activity':'Activity Log','area-ACC':'Account','area-OPC':'Operations','area-FIN':'Finance','area-OPP':'Projects','area-HR':'HR'};
+  const areaLabels = {};
+  Object.entries(AREAS).forEach(([code, a]) => { areaLabels['area-'+code] = a.name; });
+  const labels={...{'today':'Today','dashboard':'Dashboard','new-task':'New Task','weekly':'Weekly Review','timeline':'Timeline','activity':'Activity Log','admin':'Manage Areas'},...areaLabels};
   document.getElementById('breadcrumb').textContent=labels[viewId]||viewId;
   window.scrollTo(0, 0);
 }
@@ -3109,7 +3198,9 @@ function toast(msg,type="success") {
 // ═══════════════════════════════════════════════════════════
 function updateNavBadges() {
   Object.keys(AREAS).forEach(code=>{
-    document.getElementById(`badge-${code}`).textContent=tasks.filter(t=>t.area===code).length;
+    const badge=document.getElementById(`badge-${code}`);
+    if(!badge) return;
+    badge.textContent=tasks.filter(t=>t.area===code).length;
     const hasOverdue=tasks.some(t=>t.area===code&&t.deadline&&t.deadline<TODAY&&t.status!=='Completed'&&t.status!=='Waiting on');
     const hasBlocked=tasks.some(t=>t.area===code&&t.status==='Blocked');
     const hasSoon=tasks.some(t=>t.area===code&&t.deadline&&t.deadline>=TODAY&&Math.ceil((new Date(t.deadline)-new Date(TODAY))/86400000)<=3&&t.status!=='Completed');
@@ -3693,6 +3784,296 @@ document.addEventListener('keydown', e => {
   }
 });
 
+
+// ═══════════════════════════════════════════════════════════
+// AREAS ADMIN — DB helpers + UI
+// ═══════════════════════════════════════════════════════════
+
+// ── Supabase helpers ──
+async function dbGetAreas() {
+  const res = await fetch(`${API_BASE}/areas?order=sort_order.asc,name.asc`, { headers: authHeaders({'Prefer':''}) });
+  if (!res.ok) throw new Error('GET areas failed');
+  return res.json();
+}
+async function dbCreateArea(data) {
+  const res = await fetch(`${API_BASE}/areas`, { method:'POST', headers: authHeaders({'Prefer':'return=representation'}), body: JSON.stringify(data) });
+  if (!res.ok) { const b=await res.text(); throw new Error('CREATE area failed: '+b); }
+  return (await res.json())[0];
+}
+async function dbUpdateArea(id, data) {
+  const res = await fetch(`${API_BASE}/areas?id=eq.${id}`, { method:'PATCH', headers: authHeaders({'Prefer':'return=representation'}), body: JSON.stringify(data) });
+  if (!res.ok) { const b=await res.text(); throw new Error('UPDATE area failed: '+b); }
+  return (await res.json())[0];
+}
+async function dbDeleteArea(id) {
+  const res = await fetch(`${API_BASE}/areas?id=eq.${id}`, { method:'DELETE', headers: authHeaders({'Prefer':''}) });
+  if (!res.ok) { const b=await res.text(); throw new Error('DELETE area failed: '+b); }
+}
+
+// ── Generate a 3-letter code from a name (uppercase, no spaces) ──
+function generateAreaCode(name) {
+  const clean = name.toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if (clean.length <= 4) return clean;
+  // First letter + consonants, up to 4 chars
+  const vowels = new Set('AEIOU');
+  let code = clean[0];
+  for (let i=1; i<clean.length && code.length<4; i++) {
+    if (!vowels.has(clean[i])) code += clean[i];
+  }
+  if (code.length < 2) code = clean.slice(0,4);
+  return code.slice(0,4);
+}
+
+// ── Main admin render ──
+async function renderAdminAreas() {
+  const el = document.getElementById('view-admin');
+  if (!el) return;
+  el.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border)">
+    <div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.02em">Manage Areas</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--subtle);margin-top:3px;letter-spacing:.08em">Create, edit and organise work areas</div>
+    </div>
+    <button class="btn btn-primary" onclick="openAreaModal()">+ New Area</button>
+  </div>
+  <div id="adminAreaList" style="display:flex;flex-direction:column;gap:6px;">
+    <div style="text-align:center;padding:40px;color:var(--subtle);font-family:var(--mono);font-size:12px;">Loading…</div>
+  </div>`;
+
+  try {
+    const rows = await dbGetAreas();
+    renderAdminAreaList(rows);
+  } catch(e) {
+    document.getElementById('adminAreaList').innerHTML =
+      `<div style="color:var(--red);font-family:var(--mono);font-size:12px;padding:20px">Could not load areas: ${e.message}</div>`;
+  }
+}
+
+function renderAdminAreaList(rows) {
+  const el = document.getElementById('adminAreaList');
+  if (!el) return;
+  if (!rows.length) {
+    el.innerHTML = `<div style="text-align:center;padding:48px 20px;">
+      <div style="font-size:28px;margin-bottom:10px">📋</div>
+      <div style="font-size:14px;font-weight:600;color:var(--text2);margin-bottom:4px">No areas yet</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--subtle)">Create your first work area to get started</div>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sh-xs)">
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:var(--card2);border-bottom:1px solid var(--border2)">
+          <th style="padding:10px 16px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--subtle);text-align:left">Color</th>
+          <th style="padding:10px 16px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--subtle);text-align:left">Code</th>
+          <th style="padding:10px 16px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--subtle);text-align:left">Name</th>
+          <th style="padding:10px 16px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--subtle);text-align:left">Tasks</th>
+          <th style="padding:10px 16px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--subtle);text-align:left">Status</th>
+          <th style="padding:10px 16px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--subtle);text-align:left">Order</th>
+          <th style="padding:10px 16px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--subtle);text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((a, i) => {
+          const taskCount = tasks.filter(t => t.area === a.code).length;
+          const isActive = a.active !== false;
+          const hex = a.hex || AREA_PALETTE[i % AREA_PALETTE.length];
+          return `<tr style="border-bottom:1px solid var(--border);transition:background .12s" onmouseenter="this.style.background='rgba(67,97,238,.02)'" onmouseleave="this.style.background=''">
+            <td style="padding:11px 16px">
+              <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${escAttr(hex)};box-shadow:0 0 0 1px rgba(0,0,0,.1)"></span>
+            </td>
+            <td style="padding:11px 16px">
+              <span class="id-chip">${escHtml(a.code)}</span>
+            </td>
+            <td style="padding:11px 16px;font-size:13px;font-weight:500;color:var(--text)">${escHtml(a.name)}</td>
+            <td style="padding:11px 16px;font-family:var(--mono);font-size:11px;color:var(--muted)">${taskCount}</td>
+            <td style="padding:11px 16px">
+              <span class="badge ${isActive ? 'badge-completed' : 'badge-pending'}">${isActive ? 'Active' : 'Inactive'}</span>
+            </td>
+            <td style="padding:11px 16px;font-family:var(--mono);font-size:11px;color:var(--subtle)">${a.sort_order ?? i}</td>
+            <td style="padding:11px 16px;text-align:right">
+              <div style="display:flex;gap:5px;justify-content:flex-end">
+                <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px" onclick="openAreaModal(${JSON.stringify(a).split('"').join('&quot;')})">Edit</button>
+                <button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;color:var(--${isActive?'red':'green'})" onclick="toggleAreaActive(${a.id}, ${!isActive})">${isActive ? 'Deactivate' : 'Activate'}</button>
+                <button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="confirmDeleteArea(${a.id}, '${escAttr(a.code)}', '${escAttr(a.name)}', ${taskCount})">Delete</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:12px;font-family:var(--mono);font-size:10px;color:var(--subtle);padding:0 4px">
+    ${rows.length} area${rows.length!==1?'s':''} · Changes take effect immediately across the system
+  </div>`;
+}
+
+// ── Area modal (create / edit) ──
+function openAreaModal(area) {
+  const isEdit = !!area;
+  const title  = isEdit ? 'Edit Area' : 'New Area';
+  const hex    = area?.hex || AREA_PALETTE[Object.keys(AREAS).length % AREA_PALETTE.length];
+
+  const body = `
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Area Name *</label>
+        <input type="text" id="am-name" placeholder="e.g. Marketing" value="${escAttr(area?.name||'')}" oninput="if(!${isEdit})document.getElementById('am-code').value=generateAreaCode(this.value)"/>
+      </div>
+      <div class="form-field">
+        <label>Code * <span style="font-weight:400;color:var(--subtle)">(2–4 uppercase letters)</span></label>
+        <input type="text" id="am-code" placeholder="e.g. MKT" value="${escAttr(area?.code||'')}" maxlength="4" style="text-transform:uppercase" ${isEdit?'disabled title="Code cannot be changed after creation"':''}/>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Color</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px" id="am-colorpicker">
+          ${AREA_PALETTE.map(c=>`<button type="button" onclick="selectAreaColor('${c}')" data-color="${c}"
+            style="width:24px;height:24px;border-radius:5px;background:${c};border:2px solid ${c===hex?'var(--text)':'transparent'};cursor:pointer;transition:transform .12s"
+            title="${c}"></button>`).join('')}
+          <input type="color" id="am-colorCustom" value="${hex}" style="width:24px;height:24px;border:none;padding:0;border-radius:5px;cursor:pointer;background:none" title="Custom color" oninput="selectAreaColor(this.value)"/>
+        </div>
+        <input type="hidden" id="am-color" value="${hex}"/>
+      </div>
+      <div class="form-field">
+        <label>Sort Order</label>
+        <input type="number" id="am-order" value="${area?.sort_order??Object.keys(AREAS).length}" min="0" step="1" placeholder="0"/>
+      </div>
+    </div>
+    <div class="form-field" style="margin-bottom:0">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)">
+        <input type="checkbox" id="am-active" ${(area?.active!==false)?'checked':''}/> Active (visible in task selectors)
+      </label>
+    </div>
+    <div class="form-actions" style="margin-top:18px">
+      <button class="btn btn-primary" onclick="saveArea(${isEdit?area.id:'null'},'${isEdit?area.code:''}')">${isEdit?'Save Changes':'Create Area'}</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>`;
+
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSub').textContent   = isEdit ? `Editing ${area.code}` : 'Add a new work area to the system';
+  document.getElementById('modalBody').innerHTML    = body;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function selectAreaColor(hex) {
+  document.getElementById('am-color').value = hex;
+  document.getElementById('am-colorCustom').value = hex;
+  document.querySelectorAll('#am-colorpicker button[data-color]').forEach(btn => {
+    btn.style.border = `2px solid ${btn.dataset.color===hex?'var(--text)':'transparent'}`;
+  });
+}
+
+async function saveArea(id, originalCode) {
+  const name   = document.getElementById('am-name').value.trim();
+  const code   = (document.getElementById('am-code').value || '').trim().toUpperCase();
+  const hex    = document.getElementById('am-color').value || '#4361ee';
+  const order  = parseInt(document.getElementById('am-order').value)||0;
+  const active = document.getElementById('am-active').checked;
+
+  if (!name) { toast('Area name is required.','error'); return; }
+  if (!code || code.length < 2) { toast('Code must be 2–4 uppercase letters.','error'); return; }
+  if (!/^[A-Z0-9]{2,4}$/.test(code)) { toast('Code must be 2–4 uppercase letters or digits.','error'); return; }
+
+  // Check code uniqueness on create
+  if (!id && AREAS[code]) { toast(`Code "${code}" already exists.`,'error'); return; }
+
+  setDbStatus('sync','Saving…');
+  try {
+    const data = { name, code, hex, sort_order: order, active };
+    if (id) {
+      await dbUpdateArea(id, { name, hex, sort_order: order, active });
+    } else {
+      await dbCreateArea(data);
+    }
+    closeModal();
+    await loadAreas();
+    updateNavBadges();
+    renderDashboard();
+    await renderAdminAreas();
+    toast(`Area "${name}" ${id?'updated':'created'} successfully.`,'success');
+    setDbStatus('ok','Saved');
+  } catch(e) {
+    toast('Error saving area: '+e.message,'error');
+    setDbStatus('err','Error');
+  }
+}
+
+async function toggleAreaActive(id, newActive) {
+  setDbStatus('sync','Saving…');
+  try {
+    await dbUpdateArea(id, { active: newActive });
+    await loadAreas();
+    updateNavBadges();
+    renderDashboard();
+    await renderAdminAreas();
+    toast(`Area ${newActive?'activated':'deactivated'}.`,'success');
+    setDbStatus('ok','Saved');
+  } catch(e) {
+    toast('Error: '+e.message,'error');
+    setDbStatus('err','Error');
+  }
+}
+
+async function confirmDeleteArea(id, code, name, taskCount) {
+  if (taskCount > 0) {
+    // Cannot delete — has tasks. Show reassign prompt.
+    const activeAreaCodes = Object.keys(AREAS).filter(c => c !== code);
+    if (!activeAreaCodes.length) {
+      toast('Cannot delete the only area in the system.','error');
+      return;
+    }
+    const options = activeAreaCodes.map(c => AREAS[c].name).join(', ');
+    const dest = prompt(
+      `"${name}" has ${taskCount} task(s). To delete this area, reassign them first.\n\nEnter destination area code (${activeAreaCodes.join('/')}):`,
+      activeAreaCodes[0]
+    );
+    if (!dest) return;
+    const destCode = dest.trim().toUpperCase();
+    if (!AREAS[destCode]) { toast(`Unknown area code "${destCode}".`,'error'); return; }
+    if (destCode === code)  { toast('Cannot reassign to the same area.','error'); return; }
+
+    if (!confirm(`Reassign all ${taskCount} task(s) from "${name}" to "${AREAS[destCode].name}", then delete "${name}"?`)) return;
+    setDbStatus('sync','Reassigning…');
+    try {
+      // Bulk reassign
+      const toReassign = tasks.filter(t => t.area === code);
+      for (const t of toReassign) {
+        const prev = t.area; t.area = destCode;
+        await dbUpdateTask(t);
+        await dbLogHistory(t.id,'updated',currentUser||'Admin','area',prev,destCode);
+      }
+      await dbDeleteArea(id);
+      await loadAreas();
+      tasks = (await dbGetTasks()).map(rowToTask);
+      rebuildCounters(); updateNavBadges(); renderDashboard();
+      await renderAdminAreas();
+      toast(`"${name}" deleted. ${taskCount} task(s) moved to "${AREAS[destCode].name}".`,'success');
+      setDbStatus('ok','Done');
+    } catch(e) {
+      toast('Error during deletion: '+e.message,'error');
+      setDbStatus('err','Error');
+    }
+    return;
+  }
+
+  if (!confirm(`Delete area "${name}" (${code})?\nThis area has no tasks and will be permanently removed.`)) return;
+  setDbStatus('sync','Deleting…');
+  try {
+    await dbDeleteArea(id);
+    await loadAreas();
+    updateNavBadges(); renderDashboard();
+    await renderAdminAreas();
+    toast(`Area "${name}" deleted.`,'error');
+    setDbStatus('ok','Done');
+  } catch(e) {
+    toast('Error: '+e.message,'error');
+    setDbStatus('err','Error');
+  }
+}
+
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
@@ -3735,10 +4116,13 @@ window.addEventListener('load', async () => {
     updateNavBadges();
     document.getElementById('nt-start').value=TODAY;
     initRealtime();
+    // Cargar áreas dinámicas desde Supabase
+    await loadAreas();
     // Cargar usuarios del equipo para el selector de owner
     loadTeamMembers();
-    // Cargar templates por área por defecto (ACC)
-    loadTemplates('ACC');
+    // Cargar templates por área por defecto (primer área disponible)
+    const firstArea = Object.keys(AREAS)[0] || 'ACC';
+    loadTemplates(firstArea);
     // Si ya estamos en la app (entrada directa por refresh), renderizar Today
     if (document.getElementById('app').classList.contains('visible')) {
       navigate('today', document.getElementById('nav-today'));
