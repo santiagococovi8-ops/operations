@@ -2100,6 +2100,14 @@ async function doLogin() {
 
     applyUserUI(userName);
 
+    // Recargar tareas/áreas/equipo ahora que ya tenemos el JWT del usuario
+    // (evita que la primera carga, hecha con token anónimo, quede vacía)
+    try {
+      await loadInitialData();
+    } catch (dataErr) {
+      console.error('Failed to load data after login:', dataErr);
+    }
+
     // Ocultar login → mostrar landing
     const loginEl = document.getElementById('loginScreen');
     loginEl.classList.add('hidden');
@@ -4075,6 +4083,28 @@ async function confirmDeleteArea(id, code, name, taskCount) {
 }
 
 // ═══════════════════════════════════════════════════════════
+// DATA LOADING — tareas, áreas, equipo y templates
+// Se ejecuta al cargar la página (con sesión restaurada) y
+// también justo después de un login exitoso, para que las
+// tareas se carguen con el JWT recién obtenido.
+// ═══════════════════════════════════════════════════════════
+async function loadInitialData() {
+  const rows = await dbGetTasks();
+  tasks = rows.map(rowToTask);
+  rebuildCounters();
+  document.getElementById('ls-total').textContent = tasks.length;
+  document.getElementById('ls-done').textContent = tasks.filter(t=>t.status==="Completed").length;
+  updateNavBadges();
+  // Cargar áreas dinámicas desde Supabase
+  await loadAreas();
+  // Cargar usuarios del equipo para el selector de owner
+  loadTeamMembers();
+  // Cargar templates por área por defecto (primer área disponible)
+  const firstArea = Object.keys(AREAS)[0] || 'ACC';
+  loadTemplates(firstArea);
+}
+
+// ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
 window.addEventListener('load', async () => {
@@ -4108,21 +4138,9 @@ window.addEventListener('load', async () => {
 
   try {
     loaderLabel.textContent='LOADING DATA…';
-    const rows=await dbGetTasks();
-    tasks=rows.map(rowToTask);
-    rebuildCounters();
-    document.getElementById('ls-total').textContent=tasks.length;
-    document.getElementById('ls-done').textContent=tasks.filter(t=>t.status==="Completed").length;
-    updateNavBadges();
     document.getElementById('nt-start').value=TODAY;
     initRealtime();
-    // Cargar áreas dinámicas desde Supabase
-    await loadAreas();
-    // Cargar usuarios del equipo para el selector de owner
-    loadTeamMembers();
-    // Cargar templates por área por defecto (primer área disponible)
-    const firstArea = Object.keys(AREAS)[0] || 'ACC';
-    loadTemplates(firstArea);
+    await loadInitialData();
     // Si ya estamos en la app (entrada directa por refresh), renderizar Today
     if (document.getElementById('app').classList.contains('visible')) {
       navigate('today', document.getElementById('nav-today'));
